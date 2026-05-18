@@ -64,6 +64,43 @@ Just ask in natural language, optionally mentioning the skill by name:
 
 ---
 
+## Discovering and Installing New Skills
+
+When you want a new `SKILL.md`-based skill added to this repository, ask for it by name or describe the capability you need. The expected workflow is:
+
+1. Find the best matching skill from a trusted registry or source repository.
+2. Review the skill folder before installing it, including `SKILL.md` and any associated `scripts/`, `references/`, `assets/`, templates, examples, or dependency files.
+3. Copy the complete skill folder into this repository using the existing kebab-case directory naming style.
+4. Preserve helper files that the skill depends on, but avoid copying unrelated repository metadata or unrelated skills.
+5. Update this README's skill inventory and platform notes if the new skill changes the documented setup.
+6. Run any lightweight validation that fits the skill, such as checking file layout, script executability, or referenced paths.
+7. Commit and push the new skill when requested.
+
+### Primary Discovery Sources
+
+| Source | What to Use It For |
+|--------|--------------------|
+| [agentskills.io](https://agentskills.io/) | Canonical Agent Skills standard, complete format spec, and skill directory. Skills are folders with `SKILL.md` plus optional `scripts/`, `references/`, and `assets/`. |
+| [github.com/anthropics/skills](https://github.com/anthropics/skills) | Anthropic's public skills repository with pre-built document skills and reference implementations. |
+| [skillsllm.com](https://skillsllm.com/) | Marketplace for sharing, exploring, and installing skills. |
+| [mcpservers.org/agent-skills](https://mcpservers.org/agent-skills) | Agent Skills Library with reusable skills for Claude Code, Codex, and similar coding agents. |
+| [fast-agent.ai/agents/skills](https://fast-agent.ai/agents/skills) | fast-agent skill marketplace, including the fast-agent Skills registry, Hugging Face Skills, and other configured registries. |
+| [OpenCode docs](https://opencode.ai/docs/) | OpenCode skill loading behavior and compatible `SKILL.md` paths. |
+
+### Install Checklist
+
+Use this checklist when importing a skill from an external source:
+
+- Confirm the source license allows reuse in this repository.
+- Prefer complete skill folders over single copied `SKILL.md` files when scripts or assets are referenced.
+- Keep the upstream folder structure intact when `SKILL.md` references relative paths.
+- Rename only when needed to avoid collisions or match local naming conventions; update internal references if renamed.
+- Scan scripts before adding them, especially install scripts, shell commands, network calls, and file deletion logic.
+- Add or keep dependency files such as `requirements.txt`, `package.json`, or lockfiles only when the skill's scripts require them.
+- Avoid committing generated outputs, caches, local credentials, `.env` files, or platform-specific state.
+
+---
+
 ## Skill Inventory
 
 ### Document Processing
@@ -182,7 +219,7 @@ description: A clear description of what this skill does and when to use it.
 | **Claude Desktop** | Upload ZIP via Settings → Capabilities → Skills. |
 | **Codex CLI** | Reference `SKILL.md` in prompts or system configuration. |
 | **Gemini CLI** | Use `@` to attach `SKILL.md` files to prompts. |
-| **OpenCode** | Place `skills/` folder in project and ask OpenCode to read `SKILL.md` files. |
+| **OpenCode** | Loads `SKILL.md` files from `~/.config/opencode/skills/*/SKILL.md`, `~/.claude/skills/*/SKILL.md`, and `~/.agents/skills/*/SKILL.md`. The install script links this repo through `~/.agents/skills`. |
 | **Qwen Code** | Create `skills/` directory and prompt Qwen Code to follow `SKILL.md` instructions. |
 
 ---
