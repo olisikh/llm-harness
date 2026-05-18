@@ -1,0 +1,4 @@
+interface:
+  display_name: "Resemble Detect"
+  short_description: "Help with Resemble Detect tasks and workflows"
+  default_prompt: "Use $resemble-detect to work on Resemble Detect tasks."

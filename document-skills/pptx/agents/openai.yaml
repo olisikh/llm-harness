@@ -1,0 +1,4 @@
+interface:
+  display_name: "PPTX"
+  short_description: "Help with PPTX tasks and workflows"
+  default_prompt: "Use $pptx to work on PPTX tasks."

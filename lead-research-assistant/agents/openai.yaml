@@ -1,0 +1,4 @@
+interface:
+  display_name: "Lead Research Assistant"
+  short_description: "Help with Lead Research Assistant tasks and workflows"
+  default_prompt: "Use $lead-research-assistant to work on Lead Research Assistant tasks."

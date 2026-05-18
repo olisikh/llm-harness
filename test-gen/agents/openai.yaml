@@ -1,0 +1,4 @@
+interface:
+  display_name: "Test Gen"
+  short_description: "Help with Test Gen tasks and workflows"
+  default_prompt: "Use $test-gen to work on Test Gen tasks."

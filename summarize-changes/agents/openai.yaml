@@ -1,0 +1,4 @@
+interface:
+  display_name: "Summarize Changes"
+  short_description: "Help with Summarize Changes tasks and workflows"
+  default_prompt: "Use $summarize-changes to work on Summarize Changes tasks."

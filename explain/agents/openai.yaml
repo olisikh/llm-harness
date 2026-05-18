@@ -1,0 +1,4 @@
+interface:
+  display_name: "Explain"
+  short_description: "Help with Explain tasks and workflows"
+  default_prompt: "Use $explain to work on Explain tasks."

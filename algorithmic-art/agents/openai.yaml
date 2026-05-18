@@ -1,0 +1,4 @@
+interface:
+  display_name: "Algorithmic Art"
+  short_description: "Help with Algorithmic Art tasks and workflows"
+  default_prompt: "Use $algorithmic-art to work on Algorithmic Art tasks."

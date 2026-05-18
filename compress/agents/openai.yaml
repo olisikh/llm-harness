@@ -1,0 +1,4 @@
+interface:
+  display_name: "Compress"
+  short_description: "Help with Compress tasks and workflows"
+  default_prompt: "Use $compress to work on Compress tasks."

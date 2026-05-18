@@ -1,0 +1,4 @@
+interface:
+  display_name: "Caveman Commit"
+  short_description: "Help with Caveman Commit tasks and workflows"
+  default_prompt: "Use $caveman-commit to work on Caveman Commit tasks."

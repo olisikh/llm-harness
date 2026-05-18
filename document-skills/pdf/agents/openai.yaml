@@ -1,0 +1,4 @@
+interface:
+  display_name: "PDF"
+  short_description: "Help with PDF tasks and workflows"
+  default_prompt: "Use $pdf to work on PDF tasks."

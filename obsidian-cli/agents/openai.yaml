@@ -1,0 +1,4 @@
+interface:
+  display_name: "Obsidian CLI"
+  short_description: "Help with Obsidian CLI tasks and workflows"
+  default_prompt: "Use $obsidian-cli to work on Obsidian CLI tasks."
