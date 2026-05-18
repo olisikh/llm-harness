@@ -1,0 +1,205 @@
+# LLM Skills
+
+A personal collection of LLM skills for customizing AI workflows across Claude Code, Codex, Gemini CLI, Qwen Code, OpenCode, and other LLM-powered tools.
+
+---
+
+## What Are LLM Skills?
+
+Skills are reusable instruction sets that teach LLMs how to perform specific tasks according to your requirements. By packaging context, best practices, and workflows into structured `SKILL.md` files, you can make AI assistance more consistent, repeatable, and aligned with how you work.
+
+Each skill in this repository is self-contained and ready to use with any LLM platform that supports file-based context or custom instructions.
+
+---
+
+## Quick Start
+
+### Automated Setup (Recommended)
+
+Run the install script to symlink this directory to all supported tool skill paths:
+
+```bash
+./install.sh
+```
+
+This will link `~/.skills` to the appropriate directories for each tool. If a tool already has its own native skills directory with content, it will be skipped so nothing is overwritten.
+
+To remove the symlinks later:
+
+```bash
+./uninstall.sh
+```
+
+### Manual Setup
+
+If you prefer to manage skills per-project or per-tool, copy individual skill folders to the correct location:
+
+**Claude Code**
+
+```bash
+# Project-local (recommended for team/shared projects)
+mkdir -p .claude/skills
+cp -r /path/to/this/repo/webapp-testing .claude/skills/
+
+# Or user-global (available in all projects)
+mkdir -p ~/.claude/skills
+cp -r /path/to/this/repo/webapp-testing ~/.claude/skills/
+```
+
+**Other Platforms (Codex, Gemini, OpenCode, Qwen Code)**
+
+Most CLI tools don't natively load Anthropic's skill format, but you can still use them by referencing the `SKILL.md` directly in your prompts:
+
+```bash
+# Example with Gemini CLI
+@/path/to/repo/webapp-testing/SKILL.md "Test the login page and report any issues."
+```
+
+Or copy the relevant sections from `SKILL.md` into your system prompt or configuration.
+
+### Using a Skill
+
+Just ask in natural language, optionally mentioning the skill by name:
+> "Use the **Webapp Testing** skill to validate the checkout flow and generate `report.md`."
+
+---
+
+## Skill Inventory
+
+### Document Processing
+
+| Skill | Description |
+|-------|-------------|
+| [docx](./document-skills/docx/) | Create, edit, and analyze Word documents with tracked changes, comments, and formatting. |
+| [pdf](./document-skills/pdf/) | Extract text and tables, create, merge, split, and annotate PDFs. |
+| [pptx](./document-skills/pptx/) | Create, edit, and analyze presentations with layouts, templates, and speaker notes. |
+| [xlsx](./document-skills/xlsx/) | Spreadsheet manipulation with formulas, formatting, data analysis, and visualization. |
+
+### Development & Engineering
+
+| Skill | Description |
+|-------|-------------|
+| [artifacts-builder](./artifacts-builder/) | Create elaborate, multi-component HTML artifacts using React, Tailwind CSS, and shadcn/ui. |
+| [changelog-generator](./changelog-generator/) | Generate user-facing changelogs from git commits, categorized and customer-friendly. |
+| [explain](./explain/) | Explain code, concepts, or systems clearly. Adapts depth based on the question. |
+| [fix-issue](./fix-issue/) | Fix GitHub issues by analyzing the problem, exploring the codebase, and implementing fixes. |
+| [git-commit](./git-commit/) | Stage and commit changes with well-crafted commit messages based on diffs. |
+| [mcp-builder](./mcp-builder/) | Guide for building MCP (Model Context Protocol) servers to integrate external APIs with LLMs. |
+| [skill-creator](./skill-creator/) | Guidance for creating effective, reusable skills with proper structure and documentation. |
+| [summarize-changes](./summarize-changes/) | Summarize uncommitted changes, flag risks, and highlight what changed in a reviewable format. |
+| [template-skill](./template-skill/) | A starter template for creating new skills. Copy and customize to build your own. |
+| [test-gen](./test-gen/) | Generate tests for functions, files, or features matching your project's existing test style. |
+| [webapp-testing](./webapp-testing/) | Test local web applications with Playwright for UI validation, debugging, and screenshots. |
+
+### Business & Marketing
+
+| Skill | Description |
+|-------|-------------|
+| [brand-guidelines](./brand-guidelines/) | Apply Anthropic's official brand colors and typography to artifacts for consistent visual identity. |
+| [competitive-ads-extractor](./competitive-ads-extractor/) | Extract and analyze competitor ads from ad libraries to understand messaging and creative approaches. |
+| [domain-name-brainstormer](./domain-name-brainstormer/) | Generate creative domain name ideas and check availability across .com, .io, .dev, .ai, and more. |
+| [internal-comms](./internal-comms/) | Write internal communications (status reports, updates, FAQs, newsletters) using standard formats. |
+| [lead-research-assistant](./lead-research-assistant/) | Identify and qualify leads by analyzing your product and searching for target companies. |
+
+### Communication & Writing
+
+| Skill | Description |
+|-------|-------------|
+| [content-research-writer](./content-research-writer/) | Write high-quality content with research, citations, hooks, and real-time section feedback. |
+| [meeting-insights-analyzer](./meeting-insights-analyzer/) | Analyze meeting transcripts for behavioral patterns, filler words, speaking ratios, and leadership insights. |
+
+### Creative & Media
+
+| Skill | Description |
+|-------|-------------|
+| [algorithmic-art](./algorithmic-art/) | Create algorithmic art using p5.js with seeded randomness and interactive parameter exploration. |
+| [canvas-design](./canvas-design/) | Create beautiful visual art in PNG and PDF documents for posters, designs, and static pieces. |
+| [image-enhancer](./image-enhancer/) | Improve image quality, resolution, sharpness, and clarity for presentations and documentation. |
+| [slack-gif-creator](./slack-gif-creator/) | Create animated GIFs optimized for Slack with size validation and composable animation primitives. |
+| [theme-factory](./theme-factory/) | Apply professional font and color themes to slides, docs, reports, and HTML landing pages. |
+| [video-downloader](./video-downloader/) | Download videos from YouTube and other platforms for offline viewing, editing, or archival. |
+
+### Productivity & Organization
+
+| Skill | Description |
+|-------|-------------|
+| [caveman](./caveman/) | Ultra-compressed communication mode. Cuts token usage while keeping full technical accuracy. |
+| [file-organizer](./file-organizer/) | Intelligently organize files and folders by context, find duplicates, and suggest better structures. |
+| [invoice-organizer](./invoice-organizer/) | Extract information from invoices and receipts, rename consistently, and sort for tax preparation. |
+| [raffle-winner-picker](./raffle-winner-picker/) | Fairly pick random winners from lists, spreadsheets, or Google Sheets for giveaways and contests. |
+
+### Security
+
+| Skill | Description |
+|-------|-------------|
+| [resemble-detect](./resemble-detect/) | Detect deepfakes in audio, image, video, and text. Trace synthesis sources and verify speaker identity. |
+
+---
+
+## Skill Structure
+
+Each skill follows a consistent structure:
+
+```
+skill-name/
+  SKILL.md          # Required. Core instructions, examples, and metadata.
+  scripts/          # Optional. Helper scripts referenced by the skill.
+  templates/          # Optional. Reusable templates or fixtures.
+  examples/           # Optional. Example inputs/outputs.
+```
+
+### Minimal SKILL.md Template
+
+```markdown
+---
+name: my-skill-name
+description: A clear description of what this skill does and when to use it.
+---
+
+# My Skill Name
+
+## When to Use
+
+- Use case 1
+- Use case 2
+
+## Instructions
+
+[Detailed instructions for LLMs on how to execute this skill]
+
+## Examples
+
+[Real-world examples showing the skill in action]
+```
+
+---
+
+## Platform Notes
+
+| Platform | How to Load Skills |
+|----------|-------------------|
+| **Claude Code** | Place in `.claude/skills/` (project) or `~/.claude/skills/` (user). Discovered automatically. |
+| **Claude Desktop** | Upload ZIP via Settings → Capabilities → Skills. |
+| **Codex CLI** | Reference `SKILL.md` in prompts or system configuration. |
+| **Gemini CLI** | Use `@` to attach `SKILL.md` files to prompts. |
+| **OpenCode** | Place `skills/` folder in project and ask OpenCode to read `SKILL.md` files. |
+| **Qwen Code** | Create `skills/` directory and prompt Qwen Code to follow `SKILL.md` instructions. |
+
+---
+
+## Contributing
+
+This is a personal collection, but improvements are welcome:
+
+1. Ensure the skill solves a real, repeatable problem
+2. Follow the existing structure and naming conventions
+3. Include a clear `SKILL.md` with examples
+4. Test across your target platforms before finalizing
+
+---
+
+## License
+
+This repository is licensed under the Apache License 2.0.
+
+Individual skills may have different licenses — check each skill's folder for specific licensing information.
