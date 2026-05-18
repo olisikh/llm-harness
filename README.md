@@ -86,7 +86,6 @@ When you want a new `SKILL.md`-based skill added to this repository, ask for it 
 | [mcpservers.org/agent-skills](https://mcpservers.org/agent-skills) | Agent Skills Library with reusable skills for Claude Code, Codex, and similar coding agents. |
 | [fast-agent.ai/agents/skills](https://fast-agent.ai/agents/skills) | fast-agent skill marketplace, including the fast-agent Skills registry, Hugging Face Skills, and other configured registries. |
 | [OpenCode docs](https://opencode.ai/docs/) | OpenCode skill loading behavior and compatible `SKILL.md` paths. |
-| [Anthropic](https://github.com/anthropics/skills) | Skills from Anthropic. |
 
 ### Install Checklist
 
