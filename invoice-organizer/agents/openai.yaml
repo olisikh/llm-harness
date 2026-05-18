@@ -1,0 +1,4 @@
+interface:
+  display_name: "Invoice Organizer"
+  short_description: "Help with Invoice Organizer tasks and workflows"
+  default_prompt: "Use $invoice-organizer to work on Invoice Organizer tasks."

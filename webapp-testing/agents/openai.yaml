@@ -1,0 +1,4 @@
+interface:
+  display_name: "Webapp Testing"
+  short_description: "Help with Webapp Testing tasks and workflows"
+  default_prompt: "Use $webapp-testing to work on Webapp Testing tasks."

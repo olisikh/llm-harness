@@ -1,0 +1,4 @@
+interface:
+  display_name: "XLSX"
+  short_description: "Help with XLSX tasks and workflows"
+  default_prompt: "Use $xlsx to work on XLSX tasks."

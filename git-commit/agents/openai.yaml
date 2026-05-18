@@ -1,0 +1,4 @@
+interface:
+  display_name: "Git Commit"
+  short_description: "Help with Git Commit tasks and workflows"
+  default_prompt: "Use $git-commit to work on Git Commit tasks."

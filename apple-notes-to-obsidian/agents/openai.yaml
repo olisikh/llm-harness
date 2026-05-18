@@ -1,0 +1,4 @@
+interface:
+  display_name: "Apple Notes to Obsidian"
+  short_description: "Export Apple Notes into an Obsidian vault"
+  default_prompt: "Use $apple-notes-to-obsidian to review Apple Notes and import safe notes into ~/notes."

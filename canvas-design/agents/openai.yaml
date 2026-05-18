@@ -1,0 +1,4 @@
+interface:
+  display_name: "Canvas Design"
+  short_description: "Help with Canvas Design tasks and workflows"
+  default_prompt: "Use $canvas-design to work on Canvas Design tasks."

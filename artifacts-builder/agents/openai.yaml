@@ -1,0 +1,4 @@
+interface:
+  display_name: "Artifacts Builder"
+  short_description: "Help with Artifacts Builder tasks and workflows"
+  default_prompt: "Use $artifacts-builder to work on Artifacts Builder tasks."

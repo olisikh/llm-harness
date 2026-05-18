@@ -1,0 +1,4 @@
+interface:
+  display_name: "Caveman"
+  short_description: "Help with Caveman tasks and workflows"
+  default_prompt: "Use $caveman to work on Caveman tasks."

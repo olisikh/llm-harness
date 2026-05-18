@@ -1,0 +1,4 @@
+interface:
+  display_name: "File Organizer"
+  short_description: "Help with File Organizer tasks and workflows"
+  default_prompt: "Use $file-organizer to work on File Organizer tasks."

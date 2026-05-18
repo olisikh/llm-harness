@@ -1,0 +1,4 @@
+interface:
+  display_name: "Video Downloader"
+  short_description: "Help with Video Downloader tasks and workflows"
+  default_prompt: "Use $video-downloader to work on Video Downloader tasks."

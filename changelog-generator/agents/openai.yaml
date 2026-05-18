@@ -1,0 +1,4 @@
+interface:
+  display_name: "Changelog Generator"
+  short_description: "Help with Changelog Generator tasks and workflows"
+  default_prompt: "Use $changelog-generator to work on Changelog Generator tasks."

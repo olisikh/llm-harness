@@ -112,6 +112,16 @@ Use this checklist when importing a skill from an external source:
 | [pptx](./document-skills/pptx/) | Create, edit, and analyze presentations with layouts, templates, and speaker notes. |
 | [xlsx](./document-skills/xlsx/) | Spreadsheet manipulation with formulas, formatting, data analysis, and visualization. |
 
+### Obsidian & Notes
+
+| Skill | Description |
+|-------|-------------|
+| [defuddle](./defuddle/) | Extract clean Markdown from web pages for vault-ready notes. |
+| [json-canvas](./json-canvas/) | Create and edit Obsidian JSON Canvas files. |
+| [obsidian-bases](./obsidian-bases/) | Create and edit Obsidian Bases with views, filters, formulas, and summaries. |
+| [obsidian-cli](./obsidian-cli/) | Manage Obsidian vaults through the Obsidian CLI. |
+| [obsidian-markdown](./obsidian-markdown/) | Create and edit Obsidian-flavored Markdown with properties, wikilinks, embeds, and callouts. |
+
 ### Development & Engineering
 
 | Skill | Description |
@@ -160,7 +170,11 @@ Use this checklist when importing a skill from an external source:
 
 | Skill | Description |
 |-------|-------------|
+| [apple-notes-to-obsidian](./apple-notes-to-obsidian/) | Export Apple Notes into the Obsidian vault with routing and sensitive-note triage. |
 | [caveman](./caveman/) | Ultra-compressed communication mode. Cuts token usage while keeping full technical accuracy. |
+| [caveman-commit](./caveman-commit/) | Generate ultra-compressed conventional commit messages. |
+| [caveman-review](./caveman-review/) | Write terse, actionable code review comments. |
+| [compress](./compress/) | Compress natural-language memory files while preserving technical content. |
 | [file-organizer](./file-organizer/) | Intelligently organize files and folders by context, find duplicates, and suggest better structures. |
 | [invoice-organizer](./invoice-organizer/) | Extract information from invoices and receipts, rename consistently, and sort for tax preparation. |
 | [raffle-winner-picker](./raffle-winner-picker/) | Fairly pick random winners from lists, spreadsheets, or Google Sheets for giveaways and contests. |
