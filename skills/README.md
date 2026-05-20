@@ -16,13 +16,13 @@ Each skill in this repository is self-contained and ready to use with any LLM pl
 
 ### Automated Setup (Recommended)
 
-Run the install script to symlink this directory to all supported tool skill paths:
+Run the install script from the repository root to symlink `skills/` to supported tool skill paths and expose `AGENTS.md` to Claude as `~/.claude/CLAUDE.md`:
 
 ```bash
 ./install.sh
 ```
 
-This will link `~/.skills` to the appropriate directories for each tool. If a tool already has its own native skills directory with content, it will be skipped so nothing is overwritten.
+This will link this repository's `skills/` directory to the appropriate tool-specific locations and link `AGENTS.md` to `~/.claude/CLAUDE.md`. Since this repository already lives at `~/.agents`, no `~/.agents/skills` symlink is created.
 
 To remove the symlinks later:
 
@@ -233,7 +233,7 @@ description: A clear description of what this skill does and when to use it.
 | **Claude Desktop** | Upload ZIP via Settings → Capabilities → Skills. |
 | **Codex CLI** | Reference `SKILL.md` in prompts or system configuration. |
 | **Gemini CLI** | Use `@` to attach `SKILL.md` files to prompts. |
-| **OpenCode** | Loads `SKILL.md` files from `~/.config/opencode/skills/*/SKILL.md`, `~/.claude/skills/*/SKILL.md`, and `~/.agents/skills/*/SKILL.md`. The install script links this repo through `~/.agents/skills`. |
+| **OpenCode** | Loads `SKILL.md` files from `~/.config/opencode/skills/*/SKILL.md`, `~/.claude/skills/*/SKILL.md`, and `~/.agents/skills/*/SKILL.md`. This repository already lives at `~/.agents`, so the skills are available there directly. |
 | **Qwen Code** | Create `skills/` directory and prompt Qwen Code to follow `SKILL.md` instructions. |
 
 ---

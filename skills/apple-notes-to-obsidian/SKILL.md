@@ -12,19 +12,19 @@ Export Apple Notes through the Notes app automation interface, classify each not
 ## Workflow
 
 1. Read `references/routing.md` before changing routing, ignore, or sensitivity rules.
-2. Use installed Obsidian skills when available: `obsidian:obsidian-markdown` (or `obsidian-markdown` in `~/.skills`) for properties, wikilinks, embeds, and callouts; `obsidian:obsidian-cli` (or `obsidian-cli`) for vault search and Obsidian-aware file operations.
+2. Use installed Obsidian skills when available: `obsidian:obsidian-markdown` (or `obsidian-markdown` in `~/.agents/skills`) for properties, wikilinks, embeds, and callouts; `obsidian:obsidian-cli` (or `obsidian-cli`) for vault search and Obsidian-aware file operations.
 3. Inspect the vault folders with `find ~/notes -maxdepth 2 -type d | sort` when the target layout may have changed.
 4. Run the exporter in report-only mode first:
 
 ```bash
-python3 /Users/olisikh/.skills/apple-notes-to-obsidian/scripts/export_apple_notes.py --vault ~/notes --report /tmp/apple-notes-import-report.md
+python3 /Users/olisikh/.agents/skills/apple-notes-to-obsidian/scripts/export_apple_notes.py --vault ~/notes --report /tmp/apple-notes-import-report.md
 ```
 
 5. Review `/tmp/apple-notes-import-report.md`. Do not import sensitive notes; discuss them by category only, without copying their content into chat or files.
 6. Import only after review:
 
 ```bash
-python3 /Users/olisikh/.skills/apple-notes-to-obsidian/scripts/export_apple_notes.py --vault ~/notes --write --report /tmp/apple-notes-import-report.md
+python3 /Users/olisikh/.agents/skills/apple-notes-to-obsidian/scripts/export_apple_notes.py --vault ~/notes --write --report /tmp/apple-notes-import-report.md
 ```
 
 7. Show the user the import summary and any notes routed to `40 Reference/Apple Notes Import Review/`.
