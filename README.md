@@ -1,0 +1,55 @@
+# .agents
+
+This repository contains my reusable AI agent setup.
+
+It has two main parts:
+
+- `skills/`: reusable `SKILL.md`-based skills for Claude Code, OpenCode, and other agent tools
+- `AGENTS.md`: shared behavioral instructions for coding agents, based on a concise Andrej Karpathy-style `CLAUDE.md` pattern
+
+## Repository Layout
+
+```text
+.agents/
+├── AGENTS.md
+├── README.md
+├── install.sh
+├── uninstall.sh
+└── skills/
+```
+
+## What `install.sh` Does
+
+Run from the repository root:
+
+```bash
+./install.sh
+```
+
+It sets up Claude-specific symlinks:
+
+- `~/.claude/skills` -> `~/.agents/skills`
+- `~/.claude/CLAUDE.md` -> `~/.agents/AGENTS.md`
+
+Because this repository already lives at `~/.agents`, there is no separate `~/.agents/skills` symlink step.
+
+To remove those symlinks:
+
+```bash
+./uninstall.sh
+```
+
+## How To Use
+
+- Add new reusable skills under `skills/<skill-name>/`
+- Put the main instructions for each skill in `skills/<skill-name>/SKILL.md`
+- Keep helper files for a skill inside that same folder
+- Update `skills/README.md` if you want the skill catalog and platform notes to stay documented
+
+For the full skill catalog, setup notes, and platform-specific usage details, see [`skills/README.md`](./skills/README.md).
+
+## Notes
+
+- `AGENTS.md` is the canonical source for agent behavior in this repo
+- Claude receives that file through `~/.claude/CLAUDE.md`
+- Other tools can read from this repository directly, especially from `~/.agents/skills`
