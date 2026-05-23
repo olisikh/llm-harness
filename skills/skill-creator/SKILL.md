@@ -39,6 +39,8 @@ skill-name/
     └── assets/           - Files used in output (templates, icons, fonts, etc.)
 ```
 
+On this workspace, keep the canonical skill content under `~/.agents/skills/...` and avoid maintaining duplicate copies elsewhere. If Hermes or another runtime still expects the legacy `~/.hermes/skills/...` path, create a compatibility symlink that points to the shared canonical copy instead of copying the skill tree.
+
 #### SKILL.md (required)
 
 **Metadata Quality:** The `name` and `description` in YAML frontmatter determine when Claude will use the skill. Be specific about what the skill does and when to use it. Use the third-person (e.g. "This skill should be used when..." instead of "Use this skill when...").
