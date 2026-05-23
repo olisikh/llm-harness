@@ -4,7 +4,6 @@ from __future__ import annotations
 import argparse
 import json
 import os
-import re
 import shutil
 import subprocess
 import sys
@@ -58,46 +57,36 @@ LABELS = {
 PREFERRED_SOURCE = {"codex": "cli"}
 
 
-def hermes_home() -> Path:
-    return Path(os.environ.get("HERMES_HOME", Path.home() / ".hermes")).expanduser()
-
-
 def map_provider(name: str) -> str:
     key = name.strip().lower().replace("_", "-")
     return PROVIDER_MAP.get(key, key)
 
 
-def providers_from_config(include_aux: bool = False) -> list[str]:
-    path = hermes_home() / "config.yaml"
+def codexbar_home() -> Path:
+    return Path(os.environ.get("CODEXBAR_HOME", Path.home() / ".codexbar")).expanduser()
+
+
+def providers_from_codexbar_config() -> list[str]:
+    path = codexbar_home() / "config.json"
     if not path.exists():
         return []
-
+    try:
+        payload = json.loads(path.read_text())
+    except Exception:
+        return []
+    items = payload.get("providers")
+    if not isinstance(items, list):
+        return []
     providers: list[str] = []
-    section: str | None = None
-    current_aux_provider: str | None = None
-
-    for raw in path.read_text(errors="ignore").splitlines():
-        if not raw.strip() or raw.lstrip().startswith("#"):
+    for item in items:
+        if not isinstance(item, dict) or not item.get("enabled"):
             continue
-        indent = len(raw) - len(raw.lstrip(" "))
-        line = raw.strip()
-
-        if indent == 0 and not line.startswith("-"):
-            section = line[:-1] if line.endswith(":") else None
+        provider_id = item.get("id")
+        if not isinstance(provider_id, str) or not provider_id.strip():
             continue
-
-        m = re.match(r"(?:-\s*)?provider:\s*['\"]?([^'\"#]+?)['\"]?\s*(?:#.*)?$", line)
-        if not m:
-            continue
-        val = m.group(1).strip()
-        if not val or val == "auto":
-            continue
-
-        if section in {"model", "fallback_providers"} or (include_aux and section == "auxiliary"):
-            mapped = map_provider(val)
-            if mapped not in providers:
-                providers.append(mapped)
-
+        mapped = map_provider(provider_id)
+        if mapped not in providers:
+            providers.append(mapped)
     return providers
 
 
@@ -116,8 +105,10 @@ def run_provider(provider: str, timeout: int) -> dict[str, Any]:
     source = PREFERRED_SOURCE.get(provider)
     if source:
         cmd[cmd.index("--format"):cmd.index("--format")] = ["--source", source]
+    env = dict(os.environ)
+    env.pop("CODEX_HOME", None)
     try:
-        proc = subprocess.run(cmd, text=True, capture_output=True, timeout=timeout)
+        proc = subprocess.run(cmd, text=True, capture_output=True, timeout=timeout, env=env)
     except subprocess.TimeoutExpired:
         return {"provider": provider, "error": f"timeout after {timeout}s"}
     try:
@@ -176,7 +167,6 @@ def format_line(item: dict[str, Any]) -> str | None:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--provider", action="append")
-    ap.add_argument("--include-aux", action="store_true")
     ap.add_argument("--timeout", type=int, default=75)
     ap.add_argument("--json", action="store_true")
     args = ap.parse_args()
@@ -189,12 +179,12 @@ def main() -> int:
     if args.provider:
         providers = [map_provider(p) for p in args.provider]
     else:
-        providers = providers_from_config(include_aux=args.include_aux)
+        providers = providers_from_codexbar_config()
 
     # Deduplicate while preserving order.
     providers = list(dict.fromkeys(providers))
     if not providers:
-        print("No providers found")
+        print("No enabled CodexBar providers found")
         return 2
 
     results = [run_provider(p, args.timeout) for p in providers]
