@@ -29,7 +29,8 @@ Maintain, update, restart, and debug a **source-installed** OpenClaw instance li
 - CLI wrapper: `~/.local/bin/openclaw` → `~/openclaw/openclaw.mjs`
 - Gateway LaunchAgent plist: `~/Library/LaunchAgents/ai.openclaw.gateway.plist`
 - Shared skills repo: `~/.agents` with skill content under `~/.agents/skills/`; see `references/shared-skills-repo-migration.md` for the symlink-preserving move pattern.
-- Shared skills repo on Oleksii's setup: `~/.agents` (with `~/.skills` kept as a compatibility symlink when needed)
+- Shared skills repo on Oleksii's setup: `~/.agents` (with `~/.skills` kept as a compatibility symlink when needed).
+- When authoring new skills, keep the canonical files under `~/.agents/skills` and reference that path in examples; only add `~/.hermes/skills` symlinks when a compatibility bridge is actually required.
 
 ## Invocation Note
 
@@ -47,6 +48,26 @@ launchctl print gui/$(id -u)/ai.openclaw.gateway | grep -E 'state =|pid =|last e
 - State dir: `~/.openclaw`
 - Runtime: Node 22+ (`/nix/store/…-nodejs-slim-24.14.0/bin/node` is typical)
 - Package manager: `pnpm` (NOT npm/yarn)
+
+## Auth and Model Status Commands
+
+OpenClaw on this setup does **not** have a top-level `openclaw auth` command. For auth checks, use the model commands instead:
+
+```bash
+openclaw models status
+openclaw models auth list
+```
+
+These are the authoritative commands for checking provider auth health and token state. `openclaw models status` shows the auth overview, runtime usability, and token usage; `openclaw models auth list` shows the stored auth profiles.
+
+When diagnosing "auth" issues, look for:
+
+- `Providers w/ OAuth/tokens`
+- `Runtime auth`
+- `OAuth/token status`
+- profile names like `openai-codex:default`
+
+If a user suggests `openclaw auth status`, treat that as a synonym request for `openclaw models status` / `openclaw models auth list`, not as a real command.
 
 ## Update Workflow
 
@@ -134,6 +155,14 @@ sleep 3
 launchctl list | grep ai.openclaw.gateway
 ```
 
+**If the restart/bootstrap fails after a version update**, reinstall the LaunchAgent from the built tree before trying again:
+
+```bash
+~/.local/bin/openclaw gateway install --force
+```
+
+Then re-verify the cached version files and launch the service again. If `launchctl` reports `Could not find service`, reinstalling is usually the fastest path back to a healthy daemon state.
+
 **If the plist is missing** (e.g. `launchctl print` returns "Could not find service"), reinstall it:
 
 ```bash
@@ -216,8 +245,9 @@ Recovery order:
 2. If logs show `No callable tools` or an `active-memory` plugin failure, temporarily disable `plugins.entries.active-memory` in `~/.openclaw/openclaw.json` and restart the gateway. Preserve a timestamped backup before editing JSON.
 3. If OpenAI Codex auth shows `refresh_token_reused`, switch/fallback the default model to a working provider such as `google/gemini-2.5-flash` so Telegram can respond while Codex is re-authenticated.
 4. After any config/auth change that writes to `~/.openclaw/openclaw.json` or auth profiles, restart/kick the gateway; OpenClaw logs may explicitly say `config change requires gateway restart`.
+5. If the gateway is healthy but Telegram still feels "dead", inspect for lane/auth mismatches like `unauthorized conn` and `token_mismatch`, and for provider startup aborts such as `codex app-server startup aborted`. A healthy gateway does not guarantee the active model lane is usable.
 
-For the concrete redacted recovery pattern from Oleksii's setup, see `references/openclaw-telegram-recovery.md`.
+For the concrete redacted recovery pattern from Oleksii's setup, see `references/openclaw-telegram-recovery.md` and `references/openclaw-telegram-unresponsive-auth-and-fallback.md`.
 
 ## Troubleshooting LaunchAgent Secret Resolution
 
