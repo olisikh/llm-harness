@@ -10,7 +10,7 @@ Use this skill when asked for current LLM limits, quota, remaining capacity, or 
 ## Default command
 
 ```bash
-python ~/.hermes/skills/mlops/limits/scripts/limits.py
+python ~/.agents/skills/mlops/limits/scripts/limits.py
 ```
 
 Default output is intentionally terse:
@@ -29,8 +29,8 @@ Rules:
 ## Options
 
 ```bash
-python ~/.hermes/skills/mlops/limits/scripts/limits.py --provider codex --provider opencodego
-python ~/.hermes/skills/mlops/limits/scripts/limits.py --json
+python ~/.agents/skills/mlops/limits/scripts/limits.py --provider codex --provider opencodego
+python ~/.agents/skills/mlops/limits/scripts/limits.py --json
 ```
 
 ## Notes
