@@ -5,13 +5,13 @@ set -euo pipefail
 usage() {
   cat <<'EOF'
 Usage:
-  ./scripts/update-shared-skills.sh [--commit] [--push] [submodule...]
+  ./scripts/update-skills.sh [--commit] [--push] [submodule...]
 
 Examples:
-  ./scripts/update-shared-skills.sh
-  ./scripts/update-shared-skills.sh --commit
-  ./scripts/update-shared-skills.sh --commit --push
-  ./scripts/update-shared-skills.sh obsidian-skills openclaw-skills
+  ./scripts/update-skills.sh
+  ./scripts/update-skills.sh --commit
+  ./scripts/update-skills.sh --commit --push
+  ./scripts/update-skills.sh obsidian-skills openclaw-skills
 
 Notes:
   - Updates the pinned submodule commit(s) to the latest origin default branch tip.
@@ -21,7 +21,7 @@ EOF
 }
 
 log() {
-  printf '[update-shared-skills] %s\n' "$*"
+  printf '[update-skills] %s\n' "$*"
 }
 
 die() {
@@ -63,6 +63,7 @@ declare -a default_submodules=(
   "obsidian-skills"
   "openclaw-skills"
   "mattpocock-skills"
+  "hermes-state"
 )
 
 if ((${#requested[@]} == 0)); then
