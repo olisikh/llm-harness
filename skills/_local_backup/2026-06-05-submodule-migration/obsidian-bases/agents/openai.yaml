@@ -1,0 +1,4 @@
+interface:
+  display_name: "Obsidian Bases"
+  short_description: "Help with Obsidian Bases tasks and workflows"
+  default_prompt: "Use $obsidian-bases to work on Obsidian Bases tasks."

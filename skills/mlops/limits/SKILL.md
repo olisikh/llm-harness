@@ -13,18 +13,30 @@ Use this skill when asked for current LLM limits, quota, remaining capacity, or 
 python ~/.agents/skills/mlops/limits/scripts/limits.py
 ```
 
-Default output is intentionally terse:
+## Output format (set in stone)
+
+Every line follows this exact template — no markers, no extra text:
 
 ```text
-Codex: 94%/5h 60%/7d
-OpenCode Go: 100%/5h 90%/7d 0%/30d
+<ProviderLabel>: <remaining>%/5h <remaining>%/7d <remaining>%/30d
 ```
 
-Rules:
-- Show **remaining**, not used.
-- Convert windows to human units: `300 min → 5h`, `10080 min → 7d`, `43200 min → 30d`.
-- Default to providers enabled in CodexBar config.
-- Keep user-facing output concise.
+**Provider labels (fixed):**
+| Data provider | Label |
+|---|---|
+| `codex` (OpenAI Codex) | `Codex` |
+| `opencodego` (OpenCode Go) | `Opencode GO` |
+
+**Rules:**
+- **remaining** = `100.0 - usedPercent`, rounded to whole number (no decimals).
+- Windows are always shown in order: **5h / 7d / 30d**.
+  - `300 min → 5h`
+  - `10080 min → 7d`
+  - `43200 min → 30d`
+- A window that doesn't exist for a provider simply won't appear in that provider's line.
+- Default to all providers enabled in CodexBar config. No extra output.
+- **No status/error text** unless the user explicitly asked for a failing provider or no provider returned data at all.
+- Keep output concise — exactly one line per provider with data.
 
 ## Options
 

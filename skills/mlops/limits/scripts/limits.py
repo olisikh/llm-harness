@@ -40,7 +40,7 @@ PROVIDER_MAP = {
 
 LABELS = {
     "codex": "Codex",
-    "opencodego": "OpenCode Go",
+    "opencodego": "Opencode GO",
     "gemini": "Gemini",
     "claude": "Claude",
     "openrouter": "OpenRouter",
