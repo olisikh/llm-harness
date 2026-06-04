@@ -69,9 +69,22 @@ if ((${#requested[@]} == 0)); then
   requested=("${default_submodules[@]}")
 fi
 
+declare -a declared_submodules=()
+while IFS= read -r path; do
+  [[ -n "$path" ]] && declared_submodules+=("$path")
+done < <(git config -f .gitmodules --get-regexp '^submodule\..*\.path$' | awk '{print $2}')
+
 for path in "${requested[@]}"; do
-  if [[ ! -d "$path/.git" && ! -f "$path/.git" ]]; then
-    die "submodule '$path' does not exist in $repo_root"
+  found=false
+  for declared in "${declared_submodules[@]}"; do
+    if [[ "$declared" == "$path" ]]; then
+      found=true
+      break
+    fi
+  done
+
+  if [[ "$found" != true ]]; then
+    die "submodule '$path' is not declared in $repo_root/.gitmodules"
   fi
 done
 
