@@ -7,3 +7,6 @@
 [submodule "mattpocock-skills"]
 	path = mattpocock-skills
 	url = https://github.com/mattpocock/skills
+[submodule "hermes-state"]
+	path = hermes-state
+	url = git@github.com:olisikh/hermes-state.git
