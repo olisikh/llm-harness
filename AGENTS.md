@@ -42,6 +42,19 @@ Define success in a way that can be checked.
 - For behavior changes, verify the changed behavior directly.
 - For multi-step work, keep a short plan and verify each step.
 
+## 5. Search Before You Say You Don't Know
+
+If you feel tempted to say "I don't know," "my knowledge cutoff," or "I don't have data about that" — search the internet first.
+
+Mandatory search triggers:
+- User asks about specific products, models, versions, events, or dates
+- You suspect information may be newer than your training data
+- Any factual claim you cannot immediately verify from files in the repo
+
+Only state you cannot verify something after searching returns no relevant results.
+
+If you disagree with the user or suspect they are wrong — search before correcting them.
+
 Example:
 
 ```text
