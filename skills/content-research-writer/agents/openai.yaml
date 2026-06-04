@@ -1,4 +1,0 @@
-interface:
-  display_name: "Content Research Writer"
-  short_description: "Help with Content Research Writer tasks and workflows"
-  default_prompt: "Use $content-research-writer to work on Content Research Writer tasks."

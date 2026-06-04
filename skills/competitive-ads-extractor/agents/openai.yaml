@@ -1,4 +1,0 @@
-interface:
-  display_name: "Competitive Ads Extractor"
-  short_description: "Help with Competitive Ads Extractor tasks and workflows"
-  default_prompt: "Use $competitive-ads-extractor to work on Competitive Ads Extractor tasks."

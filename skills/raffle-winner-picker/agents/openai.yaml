@@ -1,4 +1,0 @@
-interface:
-  display_name: "Raffle Winner Picker"
-  short_description: "Help with Raffle Winner Picker tasks and workflows"
-  default_prompt: "Use $raffle-winner-picker to work on Raffle Winner Picker tasks."

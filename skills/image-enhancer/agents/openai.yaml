@@ -1,4 +1,0 @@
-interface:
-  display_name: "Image Enhancer"
-  short_description: "Help with Image Enhancer tasks and workflows"
-  default_prompt: "Use $image-enhancer to work on Image Enhancer tasks."

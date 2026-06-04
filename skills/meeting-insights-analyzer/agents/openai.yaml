@@ -1,4 +1,0 @@
-interface:
-  display_name: "Meeting Insights Analyzer"
-  short_description: "Help with Meeting Insights Analyzer tasks and workflows"
-  default_prompt: "Use $meeting-insights-analyzer to work on Meeting Insights Analyzer tasks."

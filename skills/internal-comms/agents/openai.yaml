@@ -1,4 +1,0 @@
-interface:
-  display_name: "Internal Comms"
-  short_description: "Help with Internal Comms tasks and workflows"
-  default_prompt: "Use $internal-comms to work on Internal Comms tasks."
