@@ -1,4 +1,0 @@
-interface:
-  display_name: "JSON Canvas"
-  short_description: "Help with JSON Canvas tasks and workflows"
-  default_prompt: "Use $json-canvas to work on JSON Canvas tasks."
