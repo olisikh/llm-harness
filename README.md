@@ -39,6 +39,32 @@ To remove those symlinks:
 ./uninstall.sh
 ```
 
+## Updating Shared Skill Repos
+
+The shared skill sources live as git submodules:
+
+- `obsidian-skills`
+- `openclaw-skills`
+- `mattpocock-skills`
+
+To update their pinned commits from upstream:
+
+```bash
+./scripts/update-shared-skills.sh
+```
+
+To also commit and push the updated submodule pointers:
+
+```bash
+./scripts/update-shared-skills.sh --commit --push
+```
+
+You can also limit it to specific submodules:
+
+```bash
+./scripts/update-shared-skills.sh obsidian-skills openclaw-skills
+```
+
 ## How To Use
 
 - Add new reusable skills under `skills/<skill-name>/`
