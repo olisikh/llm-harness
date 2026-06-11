@@ -1,4 +1,0 @@
-interface:
-  display_name: "Defuddle"
-  short_description: "Help with Defuddle tasks and workflows"
-  default_prompt: "Use $defuddle to work on Defuddle tasks."

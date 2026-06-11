@@ -1,4 +1,0 @@
-interface:
-  display_name: "Obsidian Markdown"
-  short_description: "Help with Obsidian Markdown tasks and workflows"
-  default_prompt: "Use $obsidian-markdown to work on Obsidian Markdown tasks."
