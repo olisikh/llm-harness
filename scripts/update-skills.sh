@@ -11,7 +11,7 @@ Examples:
   ./scripts/update-skills.sh
   ./scripts/update-skills.sh --commit
   ./scripts/update-skills.sh --commit --push
-  ./scripts/update-skills.sh obsidian-skills openclaw-skills
+  ./scripts/update-skills.sh obsidian-skills mattpocock-skills
 
 Notes:
   - Updates the pinned submodule commit(s) to the latest origin default branch tip.
@@ -61,7 +61,6 @@ fi
 
 declare -a default_submodules=(
   "obsidian-skills"
-  "openclaw-skills"
   "mattpocock-skills"
 )
 

@@ -4,6 +4,3 @@
 [submodule "mattpocock-skills"]
 	path = mattpocock-skills
 	url = https://github.com/mattpocock/skills
-[submodule "openclaw-skills"]
-  path = openclaw-skills
-  url = https://github.com/openclaw/agent-skills
