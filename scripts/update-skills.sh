@@ -63,7 +63,6 @@ declare -a default_submodules=(
   "obsidian-skills"
   "openclaw-skills"
   "mattpocock-skills"
-  "hermes-state"
 )
 
 if ((${#requested[@]} == 0)); then
