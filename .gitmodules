@@ -1,12 +1,9 @@
 [submodule "obsidian-skills"]
 	path = obsidian-skills
 	url = https://github.com/kepano/obsidian-skills
-[submodule "openclaw-skills"]
-	path = openclaw-skills
-	url = https://github.com/openclaw/agent-skills
 [submodule "mattpocock-skills"]
 	path = mattpocock-skills
 	url = https://github.com/mattpocock/skills
-[submodule "hermes-state"]
-	path = hermes-state
-	url = git@github.com:olisikh/hermes-state.git
+[submodule "openclaw-skills"]
+  path = openclaw-skills
+  url = https://github.com/openclaw/agent-skills
