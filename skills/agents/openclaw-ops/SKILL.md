@@ -84,6 +84,21 @@ git tag -l | tail -5
 
 **Pitfall:** `main` and release tags diverge. The latest release may be on a `release/YYYY.M.DD` branch or a detached tag, NOT on `main`. Always check tags separately.
 
+**Pitfall:** when `origin` is a personal fork and `upstream` is the canonical OpenClaw repo, do **not** treat `origin` tags as authoritative for "latest stable". The fork can lag upstream tags. Compare against `upstream` tags (for example with `git ls-remote --tags upstream 'v*' | ... | sort -V | tail`) before choosing the target release tag.
+
+**Important local-update pitfall:** on Oleksii's source install, `openclaw update status` can infer `stable` from the current git tag while `openclaw update --dry-run` / `openclaw update` still default to `dev` if `update.channel` is unset. To force future updates onto release tags, persist:
+
+```bash
+openclaw config set update.channel stable
+```
+
+Verify with:
+
+```bash
+openclaw update --dry-run --json --yes
+# expect: "effectiveChannel": "stable"
+```
+
 ### 2. Checkout the desired version
 
 ```bash
@@ -188,9 +203,61 @@ When the user asks to let an OpenClaw-routed Telegram user talk to Hermes, inspe
 
 ### Interpreting per-agent names like `wife`
 
-On Oleksii's setup, names like `wife` refer to an **OpenClaw agent binding**, not a separate executable or LaunchAgent service. If the user says "restart wife gateway" or similar, do not assume a `wife` binary/service exists. First inspect `~/.openclaw/openclaw.json` for `agents[]` and `bindings[]` entries with `id` / `agentId` `wife`.
+Do **not** assume names like `wife` always mean an OpenClaw binding. On Oleksii's machine there may be **either**:
 
-If `wife` is just a binding on the shared OpenClaw gateway, restart the shared service (`ai.openclaw.gateway`) instead of hunting for a dedicated `wife` daemon. Preferred macOS restart/verify flow:
+1. an OpenClaw binding inside the shared `ai.openclaw.gateway`, **or**
+2. a dedicated Hermes profile gateway LaunchAgent such as `ai.hermes.gateway-wife`.
+
+When the user says "restart wife gateway" or similar, check for a dedicated LaunchAgent **before** assuming it is only an OpenClaw binding:
+
+```bash
+launchctl list | egrep 'ai\.hermes\.gateway-wife|ai\.openclaw\.gateway' || true
+grep -Rni 'wife' ~/Library/LaunchAgents ~/.config 2>/dev/null || true
+```
+
+If `~/Library/LaunchAgents/ai.hermes.gateway-wife.plist` exists, treat it as a separate Hermes gateway service and restart/verify it directly:
+
+```bash
+launchctl kickstart -k gui/$(id -u)/ai.hermes.gateway-wife
+launchctl print gui/$(id -u)/ai.hermes.gateway-wife | grep -E 'state =|pid =|last exit code'
+/Users/olisikh/hermes-agent/venv/bin/python -m hermes_cli.main --profile wife gateway status
+```
+
+Use the explicit Python entrypoint for status checks instead of relying on `hermes` being on `PATH`; non-interactive shells may report `hermes: command not found` even while the LaunchAgent is healthy.
+
+If `gateway status` reports `Service definition is stale relative to the current Hermes install`, refresh the plist with the profile-specific start command:
+
+```bash
+cd ~/hermes-agent
+./venv/bin/python -m hermes_cli.main --profile wife gateway start
+HERMES_HOME="$HOME/.hermes/profiles/wife" \
+  ./venv/bin/python -m hermes_cli.main --profile wife gateway status
+```
+
+Important nuance on Oleksii's macOS setup: the plist refresh can succeed while `launchctl bootstrap` still exits `5`, causing Hermes to fall back to a detached background process. In that case do **not** report the LaunchAgent itself as running; verify the actual process and fresh logs instead:
+
+```bash
+ps aux | grep -E 'hermes_cli\.main --profile wife gateway run --replace' | grep -v grep
+tail -n 40 ~/.hermes/profiles/wife/logs/gateway.log
+```
+
+Additional pitfall discovered when moving the Hermes checkout itself onto a stable release tag: `gateway start` can rewrite the wife plist and even print `✓ Service started` while the LaunchAgent is still **not loaded**. If `gateway status` says `Service definition matches the current Hermes install` but `Gateway service is not loaded`, manually bootstrap the plist and then kickstart it:
+
+```bash
+uid=$(id -u)
+launchctl bootstrap gui/$uid ~/Library/LaunchAgents/ai.hermes.gateway-wife.plist
+launchctl kickstart -k gui/$uid/ai.hermes.gateway-wife
+launchctl print gui/$uid/ai.hermes.gateway-wife | grep -E 'state =|pid =|last exit code'
+```
+
+Re-run the profile-specific status check after the manual bootstrap. Only report success once both of these are true:
+
+1. `gateway status` says the service definition matches and the gateway service is loaded
+2. `launchctl print gui/$(id -u)/ai.hermes.gateway-wife` shows `state = running` with a PID
+
+When the Hermes source checkout is intentionally pinned to the latest **stable tag** instead of `main`, `hermes --version` / `gateway status` may still advertise that an update is available or that the checkout is many commits behind. Treat that as expected for git installs that compare against `main`; do **not** treat it as evidence the stable-tagged wife gateway is outdated.
+
+If no dedicated `ai.hermes.gateway-wife` service exists, then inspect `~/.openclaw/openclaw.json` for `agents[]` / `bindings[]` entries with `id` or `agentId` `wife`. In that case `wife` is just a binding on the shared OpenClaw gateway, so restart the shared service instead:
 
 ```bash
 launchctl kickstart -k gui/$(id -u)/ai.openclaw.gateway
@@ -198,8 +265,7 @@ launchctl print gui/$(id -u)/ai.openclaw.gateway | grep -E 'state =|pid =|last e
 curl -fsS http://127.0.0.1:18789/health
 ```
 
-Use the wording "restarted the OpenClaw gateway that hosts the `wife` binding" so the user can confirm you targeted the right layer.
-
+Wording for the user should reflect which layer you actually touched: either "restarted the dedicated wife Hermes gateway" or "restarted the OpenClaw gateway that hosts the `wife` binding."
 ## OpenClaw Workspace Project Memories
 
 OpenClaw may store user/topic "projects" (long-lived topic memories, not code projects) under the workspace memory tree, not under a top-level `projects` directory.
