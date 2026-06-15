@@ -64,3 +64,42 @@ Example:
 ```
 
 These guidelines are working if diffs stay small, changes are directly justified, and clarification happens before implementation rather than after mistakes.
+
+## 6. Repository Operating Model
+
+- This repo is canonical `~/.agents` checkout.
+- `skills/` is mixed tree:
+  - real directories for first-party/local skills stored in this repo
+  - tracked symlinks into git submodules for shared upstream skills
+- Shared upstream submodules currently are:
+  - `obsidian-skills`
+  - `mattpocock-skills`
+
+## 7. Shared Skill Layout Rules
+
+- Shared-skill sync is generic, driven by `skills-sync.yaml`:
+  - `skillsRoot`: folder inside submodule to scan
+  - `skillsDest`: destination root inside this repo
+  - `skillsExclude`: optional relative skill paths to skip
+- Script symlinks every directory under `skillsRoot` that contains `SKILL.md`, preserving its relative path under `skillsDest`.
+- Some local skills intentionally shadow upstream variants. Keep local directories unless task explicitly says to replace them:
+  - `skills/handoff`
+  - `skills/caveman`
+- Do not replace real local skill directories with symlinks by accident.
+
+## 8. Source Of Truth For Shared Skills
+
+- `scripts/update-skills.sh` is source of truth for shared-skill sync.
+- Script responsibilities:
+  1. update requested submodule checkouts to upstream default-branch tips
+  2. read `skills-sync.yaml` and mirror matching skill dirs into `skills/`
+- Do not hand-edit managed symlinks if script should own them. Fix script or rerun script instead.
+- Prefer editing canonical files inside submodule paths when changing shared upstream skills. Editing through symlink path changes same files, but hides ownership.
+
+## 9. Verify Structure Changes
+
+- After changing submodules, skill-link rules, install/uninstall behavior, or this file, verify with:
+  1. `bash -n scripts/update-skills.sh`
+  2. `./scripts/update-skills.sh [submodule...]`
+  3. `git status --short`
+  4. `git diff --cached --submodule=short`

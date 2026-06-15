@@ -1,0 +1,11 @@
+submodules:
+  obsidian-skills:
+    skillsRoot: skills
+    skillsDest: skills
+
+  mattpocock-skills:
+    skillsRoot: skills
+    skillsDest: skills/mattpocock
+    skillsExclude:
+      - productivity/caveman
+      - productivity/handoff

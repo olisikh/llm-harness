@@ -41,13 +41,20 @@ To remove those symlinks:
 
 ## Updating Shared Skill Repos
 
-The shared skill sources live as git submodules (including the Hermes skill tree):
+The shared skill sources live as git submodules:
 
 - `obsidian-skills`
-- `openclaw-skills`
 - `mattpocock-skills`
 
-To update their pinned commits from upstream:
+Shared-skill sync metadata lives in `skills-sync.yaml`:
+
+- `skillsRoot`: folder inside submodule to scan for skills
+- `skillsDest`: destination root in this repo
+- `skillsExclude`: optional relative skill paths to skip
+
+`./scripts/update-skills.sh` symlinks every directory under `skillsRoot` that contains `SKILL.md`, preserving its relative path under `skillsDest`.
+
+To update their pinned commits from upstream and resync managed symlinks in `skills/`:
 
 ```bash
 ./scripts/update-skills.sh
@@ -62,7 +69,7 @@ To also commit and push the updated submodule pointers:
 You can also limit it to specific submodules:
 
 ```bash
-./scripts/update-skills.sh obsidian-skills openclaw-skills
+./scripts/update-skills.sh obsidian-skills mattpocock-skills
 ```
 
 ## How To Use
