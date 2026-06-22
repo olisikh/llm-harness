@@ -12,7 +12,7 @@ metadata:
 
 # OpenClaw Ops
 
-Maintain, update, restart, and debug a **source-installed** OpenClaw instance living at `~/openclaw`. This skill covers the full lifecycle when OpenClaw is NOT installed via Nix/Homebrew but cloned from GitHub and run via a custom LaunchAgent.
+Maintain, update, restart, and debug a local OpenClaw install alongside Hermes. The source checkout may live at `~/openclaw`, but the active runtime can also be a global npm-style install under `~/.local/lib/node_modules/openclaw`. Verify the wrapper and LaunchAgent before assuming `~/openclaw` is the running runtime.
 
 ## Triggers
 
@@ -26,13 +26,17 @@ Maintain, update, restart, and debug a **source-installed** OpenClaw instance li
 
 ## Environment Assumptions
 
-- Source repo: `~/openclaw`
-- CLI wrapper: `~/.local/bin/openclaw` → `~/openclaw/openclaw.mjs`
+- Source repo may exist at `~/openclaw`, but do **not** assume it is the active runtime.
+- Verify the active wrapper first: `~/.local/bin/openclaw` may point either to `~/openclaw/openclaw.mjs` or to `~/.local/lib/node_modules/openclaw/openclaw.mjs`.
+- Verify the LaunchAgent `ProgramArguments` before choosing an update path.
 - Gateway LaunchAgent plist: `~/Library/LaunchAgents/ai.openclaw.gateway.plist`
 - **Gateway log file**: `~/Library/Logs/openclaw/gateway.log` (NOT `~/.openclaw/logs/gateway.log` which may be stale from an earlier run). Use `lsof -p <gateway-pid> | grep '\.log'` to confirm the active log path if unsure.
-- Shared skills repo: `~/.agents` with skill content under `~/.agents/skills/`; see `references/shared-skills-repo-migration.md` for the symlink-preserving move pattern.
-- Shared skills repo on Oleksii's setup: `~/.agents` (with `~/.skills` kept as a compatibility symlink when needed).
-- When authoring new skills, keep the canonical files under `~/.agents/skills` and reference that path in examples; only add `~/.hermes/skills` symlinks when a compatibility bridge is actually required.
+- Shared skills repo on Oleksii's setup: `~/.agents` with skill content under `~/.agents/skills`.
+- State dir: `~/.openclaw`
+- Runtime: Node 22+ (`/nix/store/…-nodejs-slim-24.14.0/bin/node` is typical)
+- Package manager: `pnpm` (NOT npm/yarn)
+
+**Pitfall:** after migrations/imports, do not leave duplicate skill copies or backup/archive directories in `~/.hermes/skills` as pseudo-history. On Oleksii's setup, imported folders like `openclaw-imports/`, `.archive/`, and `*.backup.<timestamp>/` are migration residue, not canonical storage. Merge any useful content into `~/.agents/skills`, then delete the residue and rely on git for history.
 
 ## Invocation Note
 
@@ -47,9 +51,6 @@ After starting, verify the LaunchAgent actually came up:
 ```bash
 launchctl print gui/$(id -u)/ai.openclaw.gateway | grep -E 'state =|pid =|last exit code'
 ```
-- State dir: `~/.openclaw`
-- Runtime: Node 22+ (`/nix/store/…-nodejs-slim-24.14.0/bin/node` is typical)
-- Package manager: `pnpm` (NOT npm/yarn)
 
 ## Auth and Model Status Commands
 
@@ -72,6 +73,16 @@ When diagnosing "auth" issues, look for:
 If a user suggests `openclaw auth status`, treat that as a synonym request for `openclaw models status` / `openclaw models auth list`, not as a real command.
 
 ## Update Workflow
+
+### 0. Verify which install is actually active
+
+```bash
+command -v openclaw || true
+ls -l ~/.local/bin/openclaw
+plutil -p ~/Library/LaunchAgents/ai.openclaw.gateway.plist | grep -A4 ProgramArguments
+```
+
+If the wrapper or LaunchAgent points into `~/.local/lib/node_modules/openclaw`, treat that as the active runtime and update/verify there first. Do **not** assume a fresher `~/openclaw` checkout is what the gateway is running.
 
 ### 1. Check current checkout
 
