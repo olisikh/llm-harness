@@ -27,6 +27,12 @@ allowed-tools: Bash(git add *) Bash(git commit *) Bash(git diff *) Bash(git stat
    - Matches the tone and style of recent commits
    - Ends with: `Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>`
 4. Create the commit using a HEREDOC to preserve formatting.
-5. Report the commit hash and subject on success.
+5. If the user also asked to **push/sync**, do not assume the earlier status check is still current. Run `git fetch origin`, inspect ahead/behind, and if the push is rejected because `origin/<branch>` moved, rebase onto the updated remote branch before retrying the push. Treat this as a normal race, not as a terminal failure.
+6. Report the commit hash and subject on success.
+
+## Pitfalls
+
+- A repository can be `0 ahead / 0 behind` when you first inspect it and still reject `git push` a minute later because another process advanced `origin/main` in the meantime. When push is part of the ask, verify again right before pushing.
+- For dirty long-lived state repos, distinguish **your unique diff vs `origin/main`** from pre-existing staged/unstaged changes when explaining what your new commit actually contains.
 
 If $ARGUMENTS is provided, treat it as guidance for the commit message or scope.
