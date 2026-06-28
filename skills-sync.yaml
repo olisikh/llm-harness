@@ -1,8 +1,0 @@
-submodules:
-  obsidian-skills:
-    skillsRoot: skills
-    skillsDest: skills/obsidian
-
-  mattpocock-skills:
-    skillsRoot: skills
-    skillsDest: skills/mattpocock

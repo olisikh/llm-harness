@@ -46,11 +46,11 @@ The shared skill sources live as git submodules:
 - `obsidian-skills`
 - `mattpocock-skills`
 
-Shared-skill sync metadata lives in `skills-sync.yaml`:
+Shared-skill sync metadata lives in `skills-config.yaml`:
 
-- `skillsRoot`: folder inside submodule to scan for skills
-- `skillsDest`: destination root in this repo
-- `skillsExclude`: optional relative skill paths to skip
+- `root`: folder inside submodule to scan for skills
+- `dest`: destination root in this repo
+- `exclude`: optional relative skill paths to skip
 
 `./scripts/update-skills.sh` symlinks every directory under `skillsRoot` that contains `SKILL.md`, preserving its relative path under `skillsDest`.
 

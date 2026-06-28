@@ -1,0 +1,9 @@
+---
+submodules:
+  obsidian-skills:
+    root: skills
+    dest: skills/obsidian
+
+  mattpocock-skills:
+    root: skills
+    dest: skills/mattpocock
