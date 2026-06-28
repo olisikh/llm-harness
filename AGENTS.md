@@ -77,11 +77,11 @@ These guidelines are working if diffs stay small, changes are directly justified
 
 ## 7. Shared Skill Layout Rules
 
-- Shared-skill sync is generic, driven by `skills-sync.yaml`:
-  - `skillsRoot`: folder inside submodule to scan
-  - `skillsDest`: destination root inside this repo
-  - `skillsExclude`: optional relative skill paths to skip
-- Script symlinks every directory under `skillsRoot` that contains `SKILL.md`, preserving its relative path under `skillsDest`.
+- Shared-skill sync is generic, driven by `skills-config.yaml`:
+  - `root`: folder inside submodule to scan
+  - `dest`: destination root inside this repo
+  - `exclude`: optional relative skill paths to skip
+- Script symlinks every directory under `root` that contains `SKILL.md`, preserving its relative path under `dest`.
 - Some local skills intentionally shadow upstream variants. Keep local directories unless task explicitly says to replace them:
   - `skills/handoff`
   - `skills/caveman`
@@ -92,7 +92,7 @@ These guidelines are working if diffs stay small, changes are directly justified
 - `scripts/update-skills.sh` is source of truth for shared-skill sync.
 - Script responsibilities:
   1. update requested submodule checkouts to upstream default-branch tips
-  2. read `skills-sync.yaml` and mirror matching skill dirs into `skills/`
+  2. read `skills-config.yaml` and mirror matching skill dirs into `skills/`
 - Do not hand-edit managed symlinks if script should own them. Fix script or rerun script instead.
 - Prefer editing canonical files inside submodule paths when changing shared upstream skills. Editing through symlink path changes same files, but hides ownership.
 

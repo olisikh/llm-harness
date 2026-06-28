@@ -15,7 +15,7 @@ Examples:
 
 Notes:
   - Updates pinned submodule commit(s) to latest origin default branch tip.
-  - Syncs managed skill symlinks using skills-sync.yaml.
+  - Syncs managed skill symlinks using skills-config.yaml.
   - Stages changed submodule pointers and symlink paths in parent repo.
   - Skips submodules with local uncommitted changes.
 EOF
@@ -103,9 +103,9 @@ data = yaml.safe_load(config_path.read_text()) or {}
 submodules = data.get("submodules") or {}
 entry = submodules.get(submodule_path) or {}
 
-skills_root = entry.get("skillsRoot", "")
-skills_dest = entry.get("skillsDest", "")
-skills_exclude = entry.get("skillsExclude") or []
+skills_root = entry.get("root", "")
+skills_dest = entry.get("dest", "")
+skills_exclude = entry.get("exclude") or []
 
 if not isinstance(skills_exclude, list):
     raise SystemExit(f"skillsExclude for {submodule_path} must be list")
@@ -147,7 +147,7 @@ load_sync_config_for_submodule() {
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$repo_root"
 
-SYNC_CONFIG_FILE="$repo_root/skills-sync.yaml"
+SYNC_CONFIG_FILE="$repo_root/skills-config.yaml"
 [[ -f "$SYNC_CONFIG_FILE" ]] || die "missing sync config: $SYNC_CONFIG_FILE"
 
 commit_changes=false
@@ -258,7 +258,7 @@ sync_submodule_skills() {
   load_sync_config_for_submodule "$submodule_path"
 
   if [[ -z "$submodule_skills_root" && -z "$submodule_skills_dest" ]]; then
-    log "Skipping symlink sync for $submodule_path because skills-sync.yaml has no entry"
+    log "Skipping symlink sync for $submodule_path because skills-config.yaml has no entry"
     return 0
   fi
 
