@@ -4,3 +4,6 @@
 [submodule "mattpocock-skills"]
 	path = mattpocock-skills
 	url = https://github.com/mattpocock/skills
+[submodule "llm-wiki"]
+	path = llm-wiki
+	url = https://github.com/nvk/llm-wiki

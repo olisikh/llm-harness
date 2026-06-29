@@ -2,8 +2,10 @@
 submodules:
   obsidian-skills:
     root: skills
-    dest: skills/obsidian
+    harness: agents
 
   mattpocock-skills:
     root: skills
-    dest: skills/mattpocock
+    harness: agents
+    overrides:
+      misc/git-guardrails-claude-code: claude

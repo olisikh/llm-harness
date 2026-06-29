@@ -1,88 +1,84 @@
-# .agents
+# .llm-harness
 
-This repository contains my reusable AI agent setup.
+Personal harness hub for LLM skills and harness-specific home files.
 
-It has two main parts:
-
-- `skills/`: reusable `SKILL.md`-based skills for Claude Code, OpenCode, and other agent tools
-- `AGENTS.md`: shared behavioral instructions for coding agents, based on a concise Andrej Karpathy-style `CLAUDE.md` pattern
-
-## Repository Layout
+## Layout
 
 ```text
-.agents/
-├── AGENTS.md
-├── README.md
+.llm-harness/
+├── AGENTS.md                  # repo contributor rules
+├── harness/
+│   ├── agents/                # mirrors ~/.agents/
+│   │   └── skills/
+│   ├── claude/                # mirrors ~/.claude/
+│   │   ├── CLAUDE.md
+│   │   └── skills/
+│   ├── opencode/              # mirrors ~/.config/opencode/
+│   │   └── skills/
+│   └── codex/                 # mirrors ~/.codex/
+│       └── skills/
+├── harness-paths.yaml         # non-obvious harness root overrides
 ├── install.sh
 ├── uninstall.sh
-└── skills/
+├── scripts/
+└── skills-config.yaml         # shared submodule sync rules
 ```
 
-## What `install.sh` Does
+## Install model
 
-Run from the repository root:
+Run from repo root:
 
 ```bash
 ./install.sh
 ```
 
-It sets up Claude-specific symlinks:
+Installer behavior:
 
-- `~/.claude/skills` -> `~/.agents/skills`
-- `~/.claude/CLAUDE.md` -> `~/.agents/AGENTS.md`
+- auto-discovers `harness/*`
+- maps harness homes by convention:
+  - `agents` -> `~/.agents`
+  - `claude` -> `~/.claude`
+  - `codex` -> `~/.codex`
+- reads `harness-paths.yaml` for non-obvious roots like OpenCode
+- symlinks each skill directory individually under target `skills/`
+- symlinks non-skill top-level files and directories 1:1 into target harness home
+- removes stale managed symlinks
+- warns and skips when target path already exists and is not matching expected symlink
 
-Because this repository already lives at `~/.agents`, there is no separate `~/.agents/skills` symlink step.
-
-To remove those symlinks:
+To remove managed symlinks later:
 
 ```bash
 ./uninstall.sh
 ```
 
-## Updating Shared Skill Repos
+## Shared upstream skill sync
 
-The shared skill sources live as git submodules:
+Shared skill sources live as git submodules:
 
 - `obsidian-skills`
 - `mattpocock-skills`
 
-Shared-skill sync metadata lives in `skills-config.yaml`:
-
-- `root`: folder inside submodule to scan for skills
-- `dest`: destination root in this repo
-- `exclude`: optional relative skill paths to skip
-
-`./scripts/update-skills.sh` symlinks every directory under `skillsRoot` that contains `SKILL.md`, preserving its relative path under `skillsDest`.
-
-To update their pinned commits from upstream and resync managed symlinks in `skills/`:
+Update them with:
 
 ```bash
 ./scripts/update-skills.sh
 ```
 
-To also commit and push the updated submodule pointers:
+Optional commit/push flow:
 
 ```bash
 ./scripts/update-skills.sh --commit --push
 ```
 
-You can also limit it to specific submodules:
+Sync rules:
 
-```bash
-./scripts/update-skills.sh obsidian-skills mattpocock-skills
-```
-
-## How To Use
-
-- Add new reusable skills under `skills/<skill-name>/`
-- Put the main instructions for each skill in `skills/<skill-name>/SKILL.md`
-- Keep helper files for a skill inside that same folder
-- Update `skills/README.md` if you want the skill catalog and platform notes to stay documented
-
-For the full skill catalog, setup notes, and platform-specific usage details, see [`skills/README.md`](./skills/README.md).
+- submodule skills default to portable `harness/agents/skills`
+- exceptions use explicit harness overrides in `skills-config.yaml`
+- local first-party skills can shadow upstream names; shared sync skips conflicting real directories
 
 ## Notes
 
-- `AGENTS.md` is the canonical source for agent behavior in this repo
-- Claude receives that file through `~/.claude/CLAUDE.md`
-- Other tools can read from this repository directly, especially from `~/.agents/skills`
+- canonical checkout path is `~/.llm-harness`
+- compatibility install target for portable skills remains `~/.agents/skills`
+- OpenCode will discover both `~/.agents/skills` and `~/.config/opencode/skills`
+- Claude portable-skill auto-discovery is deferred for now

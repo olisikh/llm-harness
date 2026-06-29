@@ -15,8 +15,8 @@ Examples:
 
 Notes:
   - Updates pinned submodule commit(s) to latest origin default branch tip.
-  - Syncs managed skill symlinks using skills-config.yaml.
-  - Stages changed submodule pointers and symlink paths in parent repo.
+  - Syncs shared skills into harness/<name>/skills using skills-config.yaml.
+  - Shared skills default to harness/agents/skills unless explicitly overridden.
   - Skips submodules with local uncommitted changes.
 EOF
 }
@@ -34,58 +34,10 @@ resolve_path() {
   python3 -c 'import os, sys; print(os.path.realpath(sys.argv[1]))' "$1"
 }
 
-relative_path() {
-  python3 -c 'import os, sys; print(os.path.relpath(sys.argv[2], sys.argv[1]))' "$1" "$2"
-}
-
 path_is_within() {
   local path="$1"
   local root="$2"
   [[ "$path" == "$root" || "$path" == "$root"/* ]]
-}
-
-contains_item() {
-  local needle="$1"
-  shift || true
-
-  local item
-  for item in "$@"; do
-    if [[ "$item" == "$needle" ]]; then
-      return 0
-    fi
-  done
-
-  return 1
-}
-
-list_skill_dirs() {
-  python3 - "$1" <<'PY'
-import os
-import sys
-
-root = sys.argv[1]
-for current_root, dirs, files in os.walk(root):
-    dirs.sort()
-    if "SKILL.md" in files:
-        print(os.path.relpath(current_root, root))
-        dirs[:] = []
-PY
-}
-
-list_symlink_paths() {
-  python3 - "$1" <<'PY'
-import os
-import sys
-
-root = sys.argv[1]
-for current_root, dirs, files in os.walk(root):
-    dirs.sort()
-    names = sorted(dirs + files)
-    for name in names:
-        path = os.path.join(current_root, name)
-        if os.path.islink(path):
-            print(os.path.relpath(path, root))
-PY
 }
 
 read_sync_config() {
@@ -100,20 +52,24 @@ import yaml
 config_path = Path(sys.argv[1])
 submodule_path = sys.argv[2]
 data = yaml.safe_load(config_path.read_text()) or {}
-submodules = data.get("submodules") or {}
-entry = submodules.get(submodule_path) or {}
+entry = (data.get("submodules") or {}).get(submodule_path) or {}
 
-skills_root = entry.get("root", "")
-skills_dest = entry.get("dest", "")
-skills_exclude = entry.get("exclude") or []
+root = entry.get("root", "")
+harness = entry.get("harness", "")
+exclude = entry.get("exclude") or []
+overrides = entry.get("overrides") or {}
 
-if not isinstance(skills_exclude, list):
-    raise SystemExit(f"skillsExclude for {submodule_path} must be list")
+if exclude and not isinstance(exclude, list):
+    raise SystemExit(f"exclude for {submodule_path} must be a list")
+if overrides and not isinstance(overrides, dict):
+    raise SystemExit(f"overrides for {submodule_path} must be a mapping")
 
-print(skills_root)
-print(skills_dest)
-for value in skills_exclude:
+print(root)
+print(harness)
+for value in exclude:
     print(f"exclude\t{value}")
+for key, value in sorted(overrides.items()):
+    print(f"override\t{key}\t{value}")
 PY
 }
 
@@ -123,8 +79,9 @@ load_sync_config_for_submodule() {
   local index=0
 
   submodule_skills_root=""
-  submodule_skills_dest=""
+  submodule_default_harness=""
   submodule_skills_excludes=()
+  declare -gA submodule_skill_overrides=()
 
   while IFS= read -r line; do
     case "$index" in
@@ -132,11 +89,16 @@ load_sync_config_for_submodule() {
         submodule_skills_root="$line"
         ;;
       1)
-        submodule_skills_dest="$line"
+        submodule_default_harness="$line"
         ;;
       *)
         if [[ "$line" == exclude$'\t'* ]]; then
           submodule_skills_excludes+=("${line#*$'\t'}")
+        elif [[ "$line" == override$'\t'* ]]; then
+          local payload="${line#*$'\t'}"
+          local rel_path="${payload%%$'\t'*}"
+          local harness_name="${payload#*$'\t'}"
+          submodule_skill_overrides["$rel_path"]="$harness_name"
         fi
         ;;
     esac
@@ -206,16 +168,15 @@ current_branch="$(git branch --show-current)"
 declare -a changed_paths=()
 declare -a syncable_submodules=()
 declare -a submodule_skills_excludes=()
+declare -A submodule_skill_overrides=()
 
 synced_any=false
 submodule_skills_root=""
-submodule_skills_dest=""
+submodule_default_harness=""
 
 sync_link() {
   local dest_rel="$1"
-  local link_target="$2"
-  local source_abs="$3"
-
+  local source_abs="$2"
   local dest_abs="$repo_root/$dest_rel"
   local dest_parent
   dest_parent="$(dirname "$dest_abs")"
@@ -229,13 +190,14 @@ sync_link() {
 
     rm "$dest_abs"
   elif [[ -e "$dest_abs" ]]; then
-    die "refusing to replace non-symlink path '$dest_rel'"
+    log "Skipping local path $dest_rel"
+    return 1
   fi
 
-  ln -s "$link_target" "$dest_abs"
+  ln -s "$source_abs" "$dest_abs"
   changed_paths+=("$dest_rel")
   synced_any=true
-  log "Synced $dest_rel -> $link_target"
+  log "Synced $dest_rel -> $source_abs"
   return 0
 }
 
@@ -257,59 +219,87 @@ sync_submodule_skills() {
 
   load_sync_config_for_submodule "$submodule_path"
 
-  if [[ -z "$submodule_skills_root" && -z "$submodule_skills_dest" ]]; then
+  if [[ -z "$submodule_skills_root" && -z "$submodule_default_harness" ]]; then
     log "Skipping symlink sync for $submodule_path because skills-config.yaml has no entry"
     return 0
   fi
 
-  if [[ -z "$submodule_skills_root" || -z "$submodule_skills_dest" ]]; then
+  if [[ -z "$submodule_skills_root" || -z "$submodule_default_harness" ]]; then
     die "incomplete sync config for $submodule_path in $SYNC_CONFIG_FILE"
   fi
 
   local source_root="$repo_root/$submodule_path/$submodule_skills_root"
-  local dest_root="$repo_root/$submodule_skills_dest"
   [[ -d "$source_root" ]] || die "expected skills directory missing: $source_root"
 
-  mkdir -p "$dest_root"
-
-  local desired=()
   local rel_path
+  local skill_name
+  local harness_name
   local source_abs
   local dest_rel
-  local link_target
-  local dest_abs
-  local resolved
+  declare -A desired_dest_to_source=()
+  declare -A desired_dest_seen=()
 
   while IFS= read -r rel_path; do
     [[ -n "$rel_path" ]] || continue
-    if contains_item "$rel_path" "${submodule_skills_excludes[@]}"; then
-      continue
-    fi
 
-    desired+=("$rel_path")
+    local skip=false
+    local excluded
+    for excluded in "${submodule_skills_excludes[@]}"; do
+      if [[ "$excluded" == "$rel_path" ]]; then
+        skip=true
+        break
+      fi
+    done
+    $skip && continue
+
+    skill_name="$(basename "$rel_path")"
+    harness_name="${submodule_skill_overrides[$rel_path]:-$submodule_default_harness}"
     source_abs="$source_root/$rel_path"
-    dest_rel="$submodule_skills_dest/$rel_path"
-    link_target="$(relative_path "$(dirname "$repo_root/$dest_rel")" "$source_abs")"
-    sync_link "$dest_rel" "$link_target" "$source_abs" || true
-  done < <(list_skill_dirs "$source_root")
+    dest_rel="harness/$harness_name/skills/$skill_name"
 
-  while IFS= read -r rel_path; do
-    [[ -n "$rel_path" ]] || continue
-
-    dest_rel="$submodule_skills_dest/$rel_path"
-    dest_abs="$repo_root/$dest_rel"
-    resolved="$(resolve_path "$dest_abs")"
-
-    if ! path_is_within "$resolved" "$source_root"; then
-      continue
+    if [[ -n "${desired_dest_seen[$dest_rel]:-}" ]]; then
+      die "duplicate destination '$dest_rel' while syncing $submodule_path"
     fi
 
-    if contains_item "$rel_path" "${desired[@]}"; then
-      continue
-    fi
+    desired_dest_seen["$dest_rel"]="1"
+    desired_dest_to_source["$dest_rel"]="$source_abs"
+    sync_link "$dest_rel" "$source_abs" || true
+  done < <(python3 - "$source_root" <<'PY'
+import os
+import sys
 
-    remove_link "$dest_rel" || true
-  done < <(list_symlink_paths "$dest_root")
+root = sys.argv[1]
+for current_root, dirs, files in os.walk(root):
+    dirs.sort()
+    if "SKILL.md" in files:
+        print(os.path.relpath(current_root, root))
+        dirs[:] = []
+PY
+)
+
+  local harness_dir
+  for harness_dir in "$repo_root/harness"/*; do
+    [[ -d "$harness_dir/skills" ]] || continue
+    local existing_path
+    for existing_path in "$harness_dir/skills"/*; do
+      [[ -e "$existing_path" || -L "$existing_path" ]] || continue
+      [[ -L "$existing_path" ]] || continue
+
+      local existing_rel="${existing_path#$repo_root/}"
+      local resolved
+      resolved="$(resolve_path "$existing_path")"
+
+      if ! path_is_within "$resolved" "$source_root"; then
+        continue
+      fi
+
+      if [[ -n "${desired_dest_to_source[$existing_rel]:-}" ]]; then
+        continue
+      fi
+
+      remove_link "$existing_rel" || true
+    done
+  done
 }
 
 sync_requested_links() {
