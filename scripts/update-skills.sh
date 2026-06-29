@@ -54,8 +54,15 @@ submodule_path = sys.argv[2]
 data = yaml.safe_load(config_path.read_text()) or {}
 entry = (data.get("submodules") or {}).get(submodule_path) or {}
 
-root = entry.get("root", "")
-harness = entry.get("harness", "")
+sources = entry.get("sources")
+if sources is None:
+    root = entry.get("root", "")
+    harness = entry.get("harness", "")
+    if root or harness:
+        sources = [{"root": root, "harness": harness}]
+    else:
+        sources = []
+
 exclude = entry.get("exclude") or []
 overrides = entry.get("overrides") or {}
 
@@ -63,9 +70,14 @@ if exclude and not isinstance(exclude, list):
     raise SystemExit(f"exclude for {submodule_path} must be a list")
 if overrides and not isinstance(overrides, dict):
     raise SystemExit(f"overrides for {submodule_path} must be a mapping")
+if sources and not isinstance(sources, list):
+    raise SystemExit(f"sources for {submodule_path} must be a list")
 
-print(root)
-print(harness)
+print(len(sources))
+for source in sources:
+    if not isinstance(source, dict):
+        raise SystemExit(f"source entries for {submodule_path} must be mappings")
+    print(f"source\t{source.get('root', '')}\t{source.get('harness', '')}")
 for value in exclude:
     print(f"exclude\t{value}")
 for key, value in sorted(overrides.items()):
@@ -76,33 +88,38 @@ PY
 load_sync_config_for_submodule() {
   local submodule_path="$1"
   local line
-  local index=0
 
-  submodule_skills_root=""
-  submodule_default_harness=""
+  submodule_source_roots=()
+  submodule_source_harnesses=()
   submodule_skills_excludes=()
   declare -gA submodule_skill_overrides=()
+  local source_count=0
+  local sources_read=0
 
   while IFS= read -r line; do
-    case "$index" in
-      0)
-        submodule_skills_root="$line"
-        ;;
-      1)
-        submodule_default_harness="$line"
-        ;;
-      *)
-        if [[ "$line" == exclude$'\t'* ]]; then
-          submodule_skills_excludes+=("${line#*$'\t'}")
-        elif [[ "$line" == override$'\t'* ]]; then
-          local payload="${line#*$'\t'}"
-          local rel_path="${payload%%$'\t'*}"
-          local harness_name="${payload#*$'\t'}"
-          submodule_skill_overrides["$rel_path"]="$harness_name"
-        fi
-        ;;
-    esac
-    index=$((index + 1))
+    if (( sources_read == 0 )); then
+      source_count="$line"
+      sources_read=1
+      continue
+    fi
+
+    if (( ${#submodule_source_roots[@]} < source_count )) && [[ "$line" == source$'\t'* ]]; then
+      local payload="${line#*$'\t'}"
+      local root="${payload%%$'\t'*}"
+      local harness_name="${payload#*$'\t'}"
+      submodule_source_roots+=("$root")
+      submodule_source_harnesses+=("$harness_name")
+      continue
+    fi
+
+    if [[ "$line" == exclude$'\t'* ]]; then
+      submodule_skills_excludes+=("${line#*$'\t'}")
+    elif [[ "$line" == override$'\t'* ]]; then
+      local payload="${line#*$'\t'}"
+      local rel_path="${payload%%$'\t'*}"
+      local harness_name="${payload#*$'\t'}"
+      submodule_skill_overrides["$rel_path"]="$harness_name"
+    fi
   done < <(read_sync_config "$submodule_path")
 }
 
@@ -167,12 +184,12 @@ current_branch="$(git branch --show-current)"
 
 declare -a changed_paths=()
 declare -a syncable_submodules=()
+declare -a submodule_source_roots=()
+declare -a submodule_source_harnesses=()
 declare -a submodule_skills_excludes=()
 declare -A submodule_skill_overrides=()
 
 synced_any=false
-submodule_skills_root=""
-submodule_default_harness=""
 
 sync_link() {
   local dest_rel="$1"
@@ -219,52 +236,60 @@ sync_submodule_skills() {
 
   load_sync_config_for_submodule "$submodule_path"
 
-  if [[ -z "$submodule_skills_root" && -z "$submodule_default_harness" ]]; then
+  if ((${#submodule_source_roots[@]} == 0)); then
     log "Skipping symlink sync for $submodule_path because skills-config.yaml has no entry"
     return 0
   fi
-
-  if [[ -z "$submodule_skills_root" || -z "$submodule_default_harness" ]]; then
-    die "incomplete sync config for $submodule_path in $SYNC_CONFIG_FILE"
-  fi
-
-  local source_root="$repo_root/$submodule_path/$submodule_skills_root"
-  [[ -d "$source_root" ]] || die "expected skills directory missing: $source_root"
 
   local rel_path
   local skill_name
   local harness_name
   local source_abs
   local dest_rel
+  local source_root
+  local source_index
   declare -A desired_dest_to_source=()
   declare -A desired_dest_seen=()
+  declare -A source_roots_seen=()
 
-  while IFS= read -r rel_path; do
-    [[ -n "$rel_path" ]] || continue
+  for ((source_index = 0; source_index < ${#submodule_source_roots[@]}; source_index++)); do
+    local source_root_rel="${submodule_source_roots[$source_index]}"
+    local default_harness="${submodule_source_harnesses[$source_index]}"
 
-    local skip=false
-    local excluded
-    for excluded in "${submodule_skills_excludes[@]}"; do
-      if [[ "$excluded" == "$rel_path" ]]; then
-        skip=true
-        break
-      fi
-    done
-    $skip && continue
-
-    skill_name="$(basename "$rel_path")"
-    harness_name="${submodule_skill_overrides[$rel_path]:-$submodule_default_harness}"
-    source_abs="$source_root/$rel_path"
-    dest_rel="harness/$harness_name/skills/$skill_name"
-
-    if [[ -n "${desired_dest_seen[$dest_rel]:-}" ]]; then
-      die "duplicate destination '$dest_rel' while syncing $submodule_path"
+    if [[ -z "$source_root_rel" || -z "$default_harness" ]]; then
+      die "incomplete source config for $submodule_path in $SYNC_CONFIG_FILE"
     fi
 
-    desired_dest_seen["$dest_rel"]="1"
-    desired_dest_to_source["$dest_rel"]="$source_abs"
-    sync_link "$dest_rel" "$source_abs" || true
-  done < <(python3 - "$source_root" <<'PY'
+    source_root="$repo_root/$submodule_path/$source_root_rel"
+    [[ -d "$source_root" ]] || die "expected skills directory missing: $source_root"
+    source_roots_seen["$source_root"]="1"
+
+    while IFS= read -r rel_path; do
+      [[ -n "$rel_path" ]] || continue
+
+      local skip=false
+      local excluded
+      for excluded in "${submodule_skills_excludes[@]}"; do
+        if [[ "$excluded" == "$rel_path" ]]; then
+          skip=true
+          break
+        fi
+      done
+      $skip && continue
+
+      skill_name="$(basename "$rel_path")"
+      harness_name="${submodule_skill_overrides[$rel_path]:-$default_harness}"
+      source_abs="$source_root/$rel_path"
+      dest_rel="harness/$harness_name/skills/$skill_name"
+
+      if [[ -n "${desired_dest_seen[$dest_rel]:-}" ]]; then
+        die "duplicate destination '$dest_rel' while syncing $submodule_path"
+      fi
+
+      desired_dest_seen["$dest_rel"]="1"
+      desired_dest_to_source["$dest_rel"]="$source_abs"
+      sync_link "$dest_rel" "$source_abs" || true
+    done < <(python3 - "$source_root" <<'PY'
 import os
 import sys
 
@@ -276,6 +301,7 @@ for current_root, dirs, files in os.walk(root):
         dirs[:] = []
 PY
 )
+  done
 
   local harness_dir
   for harness_dir in "$repo_root/harness"/*; do
@@ -289,7 +315,16 @@ PY
       local resolved
       resolved="$(resolve_path "$existing_path")"
 
-      if ! path_is_within "$resolved" "$source_root"; then
+      local from_known_source=false
+      local known_source_root
+      for known_source_root in "${!source_roots_seen[@]}"; do
+        if path_is_within "$resolved" "$known_source_root"; then
+          from_known_source=true
+          break
+        fi
+      done
+
+      if [[ "$from_known_source" != true ]]; then
         continue
       fi
 

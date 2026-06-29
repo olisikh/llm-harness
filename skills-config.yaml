@@ -9,3 +9,12 @@ submodules:
     harness: agents
     overrides:
       misc/git-guardrails-claude-code: claude
+
+  llm-wiki:
+    sources:
+      - root: claude-plugin/skills
+        harness: claude
+      - root: plugins/llm-wiki-opencode/skills
+        harness: opencode
+      - root: plugins/llm-wiki/skills
+        harness: codex
