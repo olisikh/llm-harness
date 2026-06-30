@@ -53,6 +53,28 @@ print(os.path.expanduser(root))
 PY
 }
 
+list_skill_dirs() {
+  local source_skills_dir="$1"
+
+  python3 - "$source_skills_dir" <<'PY'
+import os
+import sys
+from pathlib import Path
+
+root = Path(sys.argv[1])
+if not root.exists():
+    raise SystemExit(0)
+
+for current_root, dirs, files in os.walk(root, followlinks=False):
+    dirs.sort()
+    files.sort()
+    if "SKILL.md" in files:
+        rel = os.path.relpath(current_root, root)
+        print('.' if rel == '.' else rel)
+        dirs[:] = []
+PY
+}
+
 remove_if_managed() {
   local target_abs="$1"
   local source_abs="$2"
@@ -63,6 +85,18 @@ remove_if_managed() {
     rm "$target_abs"
     log "Removed $target_abs"
   fi
+}
+
+prune_empty_parent_dirs() {
+  local path="$1"
+  local stop_dir="$2"
+  local current
+  current="$(dirname "$path")"
+
+  while [[ "$current" == "$stop_dir"/* ]]; do
+    rmdir "$current" 2>/dev/null || break
+    current="$(dirname "$current")"
+  done
 }
 
 uninstall_harness() {
@@ -80,12 +114,15 @@ uninstall_harness() {
     base_name="$(basename "$source_entry")"
     [[ "$base_name" == ".gitkeep" ]] && continue
     if [[ "$base_name" == "skills" ]]; then
-      local skill_source
-      for skill_source in "$source_entry"/*; do
-        [[ -e "$skill_source" ]] || continue
-        [[ "$(basename "$skill_source")" == ".gitkeep" ]] && continue
-        remove_if_managed "$target_root/skills/$(basename "$skill_source")" "$skill_source"
-      done
+      local rel_path
+      local target_skill
+      while IFS= read -r rel_path; do
+        [[ -n "$rel_path" ]] || continue
+        [[ "$rel_path" == "." ]] && continue
+        target_skill="$target_root/skills/$rel_path"
+        remove_if_managed "$target_skill" "$source_entry/$rel_path"
+        prune_empty_parent_dirs "$target_skill" "$target_root/skills"
+      done < <(list_skill_dirs "$source_entry")
       continue
     fi
 
