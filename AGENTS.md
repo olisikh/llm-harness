@@ -53,16 +53,17 @@ Only state you cannot verify after searching returns no useful result.
 
 ## 6. Repository Model
 
-- Canonical checkout path is `~/.llm-harness`.
+- Canonical checkout path is `~/llm-harness`.
 - Repo is harness-first.
 - `harness/<name>/` mirrors target harness home.
 - `harness/agents/` is portable/default harness and mirrors `~/.agents/`.
-- `skills/` under each harness contains direct child skill directories intended for that harness.
+- `skills/` under each harness is a source tree; `install.sh` recursively links each directory that contains `SKILL.md`, preserving nested category paths.
 
 Current conventions:
 - `harness/agents` -> `~/.agents`
 - `harness/claude` -> `~/.claude`
 - `harness/codex` -> `~/.codex`
+- `harness/hermes` -> `~/.hermes` via `harness-paths.yaml`
 - `harness/opencode` -> `~/.config/opencode` via `harness-paths.yaml`
 
 ## 7. Shared Skill Sync Rules
@@ -78,7 +79,7 @@ Current conventions:
 ## 8. Installer Rules
 
 - `install.sh` auto-discovers harness directories.
-- `skills/` install uses per-skill symlinks.
+- `skills/` install uses per-skill symlinks and preserves nested category paths.
 - Non-skill top-level harness entries install as 1:1 symlinks into harness home.
 - Existing non-matching target paths are warnings, not overwrite candidates.
 - Stale managed symlinks should be removed.

@@ -2,7 +2,8 @@
 
 Global Claude-specific files for this machine live here.
 
-- Claude-specific skills belong in `~/.claude/skills`.
-- Portable skills live in `~/.agents/skills`.
-- Portable-skill auto-discovery from `~/.agents/skills` is not wired for Claude yet.
-- Repo contributor rules for `.llm-harness` live in repo-root `AGENTS.md`, not here.
+- Claude-specific skill sources live in `~/llm-harness/harness/claude/skills` and install to `~/.claude/skills`.
+- Portable skill sources live in `~/llm-harness/harness/agents/skills` and install to `~/.agents/skills`.
+- Hermes-specific skill sources live in `~/llm-harness/harness/hermes/skills` and install to `~/.hermes/skills`.
+- Portable-skill auto-discovery from installed `~/.agents/skills` is not wired for Claude yet.
+- Repo contributor rules for `~/llm-harness` live in repo-root `AGENTS.md`, not here.
