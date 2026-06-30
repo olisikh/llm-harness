@@ -39,7 +39,7 @@ skill-name/
     └── assets/           - Files used in output (templates, icons, fonts, etc.)
 ```
 
-On this workspace, keep physical skill source files in `~/llm-harness`. Put portable skills under `~/llm-harness/harness/agents/skills/<skill-name>`, Claude-only skills under `~/llm-harness/harness/claude/skills/<skill-name>`, and Hermes-only skills under `~/llm-harness/harness/hermes/skills/<category>/<skill-name>`. After creating or editing a skill, run `cd ~/llm-harness && ./install.sh` to refresh the installed symlinks, then verify with `git status --short --branch`. If another runtime still expects a legacy path, keep only a symlinked compatibility install target rather than a second editable copy.
+On this workspace, keep physical skill source files in `~/llm-harness`. Put portable skills under `~/llm-harness/harness/agents/skills/<skill-name>`, Claude-only skills under `~/llm-harness/harness/claude/skills/<skill-name>`, and only custom Hermes-only skills under `~/llm-harness/harness/hermes/skills/<category>/<skill-name>`. Do not copy Hermes package-bundled skills into `llm-harness`; those belong in the Hermes install/source tree. After creating or editing a shared/custom skill, run `cd ~/llm-harness && ./install.sh` to refresh the installed symlinks, then verify with `git status --short --branch`. If another runtime still expects a legacy path, keep only a symlinked compatibility install target rather than a second editable copy.
 
 #### SKILL.md (required)
 

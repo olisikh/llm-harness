@@ -41,7 +41,7 @@ Installer behavior:
   - `agents` -> `~/.agents`
   - `claude` -> `~/.claude`
   - `codex` -> `~/.codex`
-- reads `harness-paths.yaml` for non-obvious roots like OpenCode and Hermes
+- reads `harness-paths.yaml` for non-obvious roots like OpenCode and custom Hermes skill installs
 - symlinks each skill directory individually under target `skills/`, preserving nested category paths
 - symlinks non-skill top-level files and directories 1:1 into target harness home
 - removes stale managed symlinks
@@ -82,6 +82,7 @@ Sync rules:
 
 - canonical checkout path is `~/llm-harness`
 - portable skill sources live under `~/llm-harness/harness/agents/skills` and install to `~/.agents/skills`
-- Hermes skill sources live under `~/llm-harness/harness/hermes/skills` and install to `~/.hermes/skills`
+- custom Hermes-only skill sources live under `~/llm-harness/harness/hermes/skills` and install to `~/.hermes/skills`
+- Hermes package-bundled skills stay in the Hermes install/source tree, not in `llm-harness`
 - OpenCode will discover both `~/.agents/skills` and `~/.config/opencode/skills`
 - Claude portable-skill auto-discovery is deferred for now

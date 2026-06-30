@@ -63,7 +63,7 @@ Current conventions:
 - `harness/agents` -> `~/.agents`
 - `harness/claude` -> `~/.claude`
 - `harness/codex` -> `~/.codex`
-- `harness/hermes` -> `~/.hermes` via `harness-paths.yaml`
+- `harness/hermes` -> `~/.hermes` via `harness-paths.yaml` for custom Hermes-only skills
 - `harness/opencode` -> `~/.config/opencode` via `harness-paths.yaml`
 
 ## 7. Shared Skill Sync Rules
