@@ -5,6 +5,10 @@ log() {
   printf '[uninstall] %s\n' "$*"
 }
 
+warn() {
+  printf '[uninstall] WARNING: %s\n' "$*" >&2
+}
+
 die() {
   printf '[uninstall] ERROR: %s\n' "$*" >&2
   exit 1
@@ -81,10 +85,21 @@ remove_if_managed() {
   local expected_resolved
   expected_resolved="$(resolve_path "$source_abs")"
 
-  if [[ -L "$target_abs" ]] && [[ "$(resolve_path "$target_abs")" == "$expected_resolved" ]]; then
-    rm "$target_abs"
-    log "Removed $target_abs"
+  if [[ ! -L "$target_abs" ]]; then
+    if [[ -e "$target_abs" ]]; then
+      warn "Skipping non-symlink at $target_abs"
+    fi
+    return 1
   fi
+
+  if [[ "$(resolve_path "$target_abs")" != "$expected_resolved" ]]; then
+    warn "Skipping symlink at $target_abs (points elsewhere)"
+    return 1
+  fi
+
+  rm "$target_abs"
+  log "Removed $target_abs"
+  return 0
 }
 
 prune_empty_parent_dirs() {
@@ -120,8 +135,9 @@ uninstall_harness() {
         [[ -n "$rel_path" ]] || continue
         [[ "$rel_path" == "." ]] && continue
         target_skill="$target_root/skills/$rel_path"
-        remove_if_managed "$target_skill" "$source_entry/$rel_path"
-        prune_empty_parent_dirs "$target_skill" "$target_root/skills"
+        if remove_if_managed "$target_skill" "$source_entry/$rel_path"; then
+          prune_empty_parent_dirs "$target_skill" "$target_root/skills"
+        fi
       done < <(list_skill_dirs "$source_entry")
       continue
     fi
