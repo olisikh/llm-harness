@@ -15,7 +15,7 @@ Examples:
 
 Notes:
   - Updates pinned submodule commit(s) to latest origin default branch tip.
-  - Syncs shared skills into harness/<name>/skills using skills-config.yaml.
+  - Syncs shared skills into harness/<name>/skills using config.yaml.
   - Shared skills default to harness/agents/skills unless explicitly overridden.
   - Skips submodules with local uncommitted changes.
 EOF
@@ -126,7 +126,7 @@ load_sync_config_for_submodule() {
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$repo_root"
 
-SYNC_CONFIG_FILE="$repo_root/skills-config.yaml"
+SYNC_CONFIG_FILE="$repo_root/config.yaml"
 [[ -f "$SYNC_CONFIG_FILE" ]] || die "missing sync config: $SYNC_CONFIG_FILE"
 
 commit_changes=false
@@ -237,7 +237,7 @@ sync_submodule_skills() {
   load_sync_config_for_submodule "$submodule_path"
 
   if ((${#submodule_source_roots[@]} == 0)); then
-    log "Skipping symlink sync for $submodule_path because skills-config.yaml has no entry"
+    log "Skipping symlink sync for $submodule_path because config.yaml has no entry"
     return 0
   fi
 
