@@ -23,7 +23,7 @@ llm-harness/
 ├── install.sh
 ├── uninstall.sh
 ├── scripts/
-└── skills-config.yaml         # shared submodule sync rules
+└── config.yaml         # shared submodule sync rules
 ```
 
 ## Install model
@@ -75,7 +75,7 @@ Optional commit/push flow:
 Sync rules:
 
 - submodule skills default to portable `harness/agents/skills`
-- exceptions use explicit harness overrides in `skills-config.yaml`
+- exceptions use explicit harness overrides in `config.yaml`
 - local first-party skills can shadow upstream names; shared sync skips conflicting real directories
 
 ## Notes
