@@ -120,6 +120,7 @@ sync_target() {
 
   if [[ -L "$target_abs" ]]; then
     if [[ "$(resolve_path "$target_abs")" == "$expected_resolved" ]]; then
+      log "Link already exists at $target_abs"
       return 0
     fi
 
