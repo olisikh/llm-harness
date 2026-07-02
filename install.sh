@@ -21,6 +21,7 @@ resolve_path() {
 repo_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 harness_root="$repo_root/harness"
 harness_paths_file="$repo_root/harness-paths.yaml"
+shared_skills_config="$repo_root/config.yaml"
 
 [[ -d "$harness_root" ]] || die "missing harness directory: $harness_root"
 
@@ -57,39 +58,76 @@ print(os.path.expanduser(root))
 PY
 }
 
-list_skill_dirs() {
-  local source_skills_dir="$1"
-
-  python3 - "$source_skills_dir" <<'PY'
+list_configured_skills() {
+  python3 - "$shared_skills_config" "$repo_root" <<'PY'
 import os
 import sys
 from pathlib import Path
 
-root = Path(sys.argv[1])
-if not root.exists():
+import yaml
+
+config_path = Path(sys.argv[1])
+repo_root = Path(sys.argv[2])
+
+if not config_path.exists():
     raise SystemExit(0)
 
-for current_root, dirs, files in os.walk(root, followlinks=False):
-    dirs.sort()
-    files.sort()
-    if "SKILL.md" in files:
-        rel = os.path.relpath(current_root, root)
-        print('.' if rel == '.' else rel)
-        dirs[:] = []
+data = yaml.safe_load(config_path.read_text()) or {}
+sources = data.get("sources") or {}
+
+for source_name, entry in sources.items():
+    source_base = repo_root / source_name
+    if not source_base.exists():
+        continue
+
+    child_sources = entry.get("sources")
+    if child_sources is None:
+        root = entry.get("root", "")
+        harness = entry.get("harness", "")
+        if root or harness:
+            child_sources = [{"root": root, "harness": harness}]
+        else:
+            child_sources = []
+
+    excludes = set(entry.get("exclude") or [])
+    overrides = entry.get("overrides") or {}
+
+    for source in child_sources:
+        root_rel = source.get("root", "")
+        default_harness = source.get("harness", "")
+        if not root_rel or not default_harness:
+            continue
+
+        source_root = source_base / root_rel
+        if not source_root.exists():
+            continue
+
+        for current_root, dirs, files in os.walk(source_root, followlinks=False):
+            dirs.sort()
+            files.sort()
+            if "SKILL.md" in files:
+                rel = os.path.relpath(current_root, source_root)
+                if rel in excludes:
+                    dirs[:] = []
+                    continue
+                harness = overrides.get(rel, default_harness)
+                print(f"{harness}\t{rel}\t{current_root}")
+                dirs[:] = []
 PY
 }
 
-list_managed_skill_symlinks() {
+list_target_managed_symlinks() {
   local target_skills_dir="$1"
-  local source_skills_dir="$2"
+  local repo_root_abs="$2"
 
-  python3 - "$target_skills_dir" "$source_skills_dir" <<'PY'
+  python3 - "$target_skills_dir" "$repo_root_abs" <<'PY'
 import os
 import sys
 from pathlib import Path
 
 target_root = Path(sys.argv[1])
-source_root = Path(sys.argv[2]).resolve()
+repo_root = Path(sys.argv[2]).resolve()
+
 if not target_root.exists():
     raise SystemExit(0)
 
@@ -105,7 +143,7 @@ for current_root, dirs, files in os.walk(target_root, followlinks=False):
         except OSError:
             continue
         try:
-            resolved.relative_to(source_root)
+            resolved.relative_to(repo_root)
         except ValueError:
             continue
         print(path)
@@ -169,42 +207,6 @@ prune_empty_parent_dirs() {
   done
 }
 
-sync_skills_dir() {
-  local source_skills_dir="$1"
-  local target_root="$2"
-  local target_skills_dir="$target_root/skills"
-
-  [[ -d "$source_skills_dir" ]] || return 0
-
-  mkdir -p "$target_skills_dir"
-
-  local rel_path
-  local source_skill
-  local target_skill
-  declare -A desired_rel_paths=()
-  while IFS= read -r rel_path; do
-    [[ -n "$rel_path" ]] || continue
-    [[ "$rel_path" == "." ]] && continue
-    desired_rel_paths["$rel_path"]="1"
-    source_skill="$source_skills_dir/$rel_path"
-    target_skill="$target_skills_dir/$rel_path"
-    sync_target "$source_skill" "$target_skill" || true
-  done < <(list_skill_dirs "$source_skills_dir")
-
-  local existing_symlink
-  local existing_rel
-  while IFS= read -r existing_symlink; do
-    [[ -n "$existing_symlink" ]] || continue
-    existing_rel="${existing_symlink#$target_skills_dir/}"
-    if [[ -n "${desired_rel_paths[$existing_rel]:-}" ]]; then
-      continue
-    fi
-    if remove_stale_symlink "$existing_symlink" "$source_skills_dir"; then
-      prune_empty_parent_dirs "$existing_symlink" "$target_skills_dir"
-    fi
-  done < <(list_managed_skill_symlinks "$target_skills_dir" "$source_skills_dir")
-}
-
 sync_harness() {
   local harness_name="$1"
   local source_dir="$harness_root/$harness_name"
@@ -214,16 +216,59 @@ sync_harness() {
   log "[$harness_name] -> $target_root"
   mkdir -p "$target_root"
 
+  local target_skills_dir="$target_root/skills"
+  mkdir -p "$target_skills_dir"
+
+  declare -A desired_sources=()
+  declare -A desired_targets_by_source=()
+  local rel_path
+  local source_skill
+  local target_skill
+  local harness_for_skill
+  local configured_source
+
+  # Configured skill sources (submodules and local) install directly to target,
+  # preserving nested category paths. Later sources in config order win on
+  # target-path collision.
+  while IFS=$'\t' read -r harness_for_skill rel_path configured_source; do
+    [[ -n "$harness_for_skill" ]] || continue
+    [[ "$harness_for_skill" == "$harness_name" ]] || continue
+
+    target_skill="$target_skills_dir/$rel_path"
+    if [[ -n "${desired_sources[$target_skill]:-}" ]]; then
+      warn "Source collision at $target_skill; later config wins"
+    fi
+    desired_sources["$target_skill"]="$configured_source"
+    desired_targets_by_source["$configured_source"]="$target_skill"
+  done < <(list_configured_skills)
+
+  for target_skill in "${!desired_sources[@]}"; do
+    source_skill="${desired_sources[$target_skill]}"
+    sync_target "$source_skill" "$target_skill" || true
+  done
+
+  local existing_symlink
+  local existing_target
+  while IFS= read -r existing_symlink; do
+    [[ -n "$existing_symlink" ]] || continue
+
+    existing_target="$(resolve_path "$existing_symlink")"
+    if [[ -n "${desired_targets_by_source[$existing_target]:-}" ]]; then
+      continue
+    fi
+
+    rm "$existing_symlink"
+    log "Removed stale $existing_symlink"
+    prune_empty_parent_dirs "$existing_symlink" "$target_skills_dir"
+  done < <(list_target_managed_symlinks "$target_skills_dir" "$repo_root")
+
   local source_entry
   local base_name
   for source_entry in "$source_dir"/*; do
-    [[ -e "$source_entry" ]] || continue
+    [[ -e "$source_entry" || -L "$source_entry" ]] || continue
     base_name="$(basename "$source_entry")"
     [[ "$base_name" == ".gitkeep" ]] && continue
-    if [[ "$base_name" == "skills" ]]; then
-      sync_skills_dir "$source_entry" "$target_root"
-      continue
-    fi
+    [[ "$base_name" == "skills" ]] && continue
 
     sync_target "$source_entry" "$target_root/$base_name" || true
   done

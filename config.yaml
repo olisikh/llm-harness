@@ -1,16 +1,19 @@
 ---
-submodules:
+sources:
   obsidian-skills:
+    type: submodule
     root: skills
     harness: agents
 
   mattpocock-skills:
+    type: submodule
     root: skills
     harness: agents
     overrides:
       misc/git-guardrails-claude-code: claude
 
   llm-wiki:
+    type: submodule
     sources:
       - root: claude-plugin/skills
         harness: claude
@@ -18,3 +21,14 @@ submodules:
         harness: opencode
       - root: plugins/llm-wiki/skills
         harness: codex
+
+  local-skills:
+    type: local
+    root: skills
+    harness: agents
+    overrides:
+      algorithmic-art: claude
+      compress: claude
+      skill-creator: claude
+      limits: codex
+      autonomous-ai-agents/llm-harness-ops: hermes

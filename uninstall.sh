@@ -57,25 +57,37 @@ print(os.path.expanduser(root))
 PY
 }
 
-list_skill_dirs() {
-  local source_skills_dir="$1"
+list_managed_symlinks() {
+  local target_skills_dir="$1"
+  local repo_root_abs="$2"
 
-  python3 - "$source_skills_dir" <<'PY'
+  python3 - "$target_skills_dir" "$repo_root_abs" <<'PY'
 import os
 import sys
 from pathlib import Path
 
-root = Path(sys.argv[1])
-if not root.exists():
+target_root = Path(sys.argv[1])
+repo_root = Path(sys.argv[2]).resolve()
+
+if not target_root.exists():
     raise SystemExit(0)
 
-for current_root, dirs, files in os.walk(root, followlinks=False):
+for current_root, dirs, files in os.walk(target_root, followlinks=False):
     dirs.sort()
     files.sort()
-    if "SKILL.md" in files:
-        rel = os.path.relpath(current_root, root)
-        print('.' if rel == '.' else rel)
-        dirs[:] = []
+    for name in list(dirs) + files:
+        path = Path(current_root) / name
+        if not path.is_symlink():
+            continue
+        try:
+            resolved = path.resolve()
+        except OSError:
+            continue
+        try:
+            resolved.relative_to(repo_root)
+        except ValueError:
+            continue
+        print(path)
 PY
 }
 
@@ -122,27 +134,28 @@ uninstall_harness() {
 
   log "[$harness_name]"
 
+  local target_skills_dir="$target_root/skills"
+  if [[ -d "$target_skills_dir" ]]; then
+    local existing_symlink
+    while IFS= read -r existing_symlink; do
+      [[ -n "$existing_symlink" ]] || continue
+      rm "$existing_symlink"
+      log "Removed $existing_symlink"
+      prune_empty_parent_dirs "$existing_symlink" "$target_skills_dir"
+    done < <(list_managed_symlinks "$target_skills_dir" "$repo_root")
+  fi
+
   local source_entry
   local base_name
   for source_entry in "$source_dir"/*; do
-    [[ -e "$source_entry" ]] || continue
+    [[ -e "$source_entry" || -L "$source_entry" ]] || continue
     base_name="$(basename "$source_entry")"
     [[ "$base_name" == ".gitkeep" ]] && continue
-    if [[ "$base_name" == "skills" ]]; then
-      local rel_path
-      local target_skill
-      while IFS= read -r rel_path; do
-        [[ -n "$rel_path" ]] || continue
-        [[ "$rel_path" == "." ]] && continue
-        target_skill="$target_root/skills/$rel_path"
-        if remove_if_managed "$target_skill" "$source_entry/$rel_path"; then
-          prune_empty_parent_dirs "$target_skill" "$target_root/skills"
-        fi
-      done < <(list_skill_dirs "$source_entry")
-      continue
-    fi
+    [[ "$base_name" == "skills" ]] && continue
 
-    remove_if_managed "$target_root/$base_name" "$source_entry"
+    if remove_if_managed "$target_root/$base_name" "$source_entry"; then
+      prune_empty_parent_dirs "$target_root/$base_name" "$target_root"
+    fi
   done
 }
 
