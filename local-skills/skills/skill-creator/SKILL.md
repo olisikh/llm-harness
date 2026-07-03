@@ -42,11 +42,10 @@ All skills for this workspace must live in `~/.llm-harness`. Do not create skill
 
 Place skills according to scope:
 
-- Portable skills: `local-skills/skills/<category>/<skill-name>/` or `harness/agents/skills/<category>/<skill-name>/`
-- Claude-only skills: `harness/claude/skills/<skill-name>/`
-- Codex-only skills: `harness/codex/skills/<skill-name>/`
-- OpenCode-only skills: `harness/opencode/skills/<skill-name>/`
-- Hermes-only skills: `harness/hermes/skills/<category>/<skill-name>/`
+- New first-party skills should live under `local-skills/skills/<skill-name>/` or `local-skills/skills/<category>/<skill-name>/`.
+- The default target harness for `local-skills` is `agents`.
+- If a skill should install to `claude`, `codex`, `hermes`, or `opencode`, keep the source under `local-skills/skills/...` and add an override under `local-skills:` in `config.yaml`.
+- Use `harness/<name>/` only for non-skill harness-specific files such as `CLAUDE.md`, not as the primary source location for skills.
 
 Source directories under `local-skills/` are discovered automatically by `harness.py install`. Submodules and harness-specific overrides are declared in `config.yaml`.
 

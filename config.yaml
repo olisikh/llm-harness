@@ -31,4 +31,5 @@ sources:
     overrides:
       algorithmic-art: claude
       compress: claude
+      autonomous-ai-agents/harness-managed-skills: hermes
       autonomous-ai-agents/llm-harness-ops: hermes
