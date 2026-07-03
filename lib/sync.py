@@ -62,7 +62,7 @@ def remove_stale_symlink(target_abs: Path, source_root_abs: Path) -> bool:
 def prune_empty_parent_dirs(path: Path, stop_dir: Path) -> None:
     current = path.parent
     stop = stop_dir.resolve()
-    while str(current).startswith(str(stop) + os.sep) or current == stop:
+    while str(current).startswith(str(stop) + os.sep):
         try:
             current.rmdir()
         except OSError:
@@ -99,8 +99,11 @@ def sync_harness(config: Config, harness_name: str) -> None:
     source_dir = config.harness_dir / harness_name
     target_root = config.resolve_harness_root(harness_name)
 
+    if not target_root.exists():
+        log(f"Skipping [{harness_name}]: {target_root} does not exist")
+        return
+
     log(f"[{harness_name}] -> {target_root}")
-    target_root.mkdir(parents=True, exist_ok=True)
 
     target_skills_dir = target_root / "skills"
     target_skills_dir.mkdir(parents=True, exist_ok=True)
@@ -149,6 +152,10 @@ def sync_harness(config: Config, harness_name: str) -> None:
 def uninstall_harness(config: Config, harness_name: str) -> None:
     source_dir = config.harness_dir / harness_name
     target_root = config.resolve_harness_root(harness_name)
+
+    if not target_root.exists():
+        print(f"[uninstall] Skipping [{harness_name}]: {target_root} does not exist")
+        return
 
     print(f"[uninstall] [{harness_name}]")
 
