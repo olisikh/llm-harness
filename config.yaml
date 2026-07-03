@@ -24,6 +24,23 @@ sources:
       - root: plugins/llm-wiki/skills
         harness: codex
 
+  awesome-llm-skills:
+    type: submodule
+    exclude:
+      - document-skills/
+    overrides:
+      algorithmic-art: claude
+    sources:
+      - root: .
+        harness: agents
+      - root: document-skills
+        harness: agents
+
+  caveman:
+    type: submodule
+    root: skills
+    harness: agents
+
   local-skills/agents:
     type: local
     root: .
@@ -43,20 +60,3 @@ sources:
     type: local
     root: .
     harness: hermes
-
-  awesome-llm-skills:
-    type: submodule
-    exclude:
-      - document-skills/
-    overrides:
-      algorithmic-art: claude
-    sources:
-      - root: .
-        harness: agents
-      - root: document-skills
-        harness: agents
-
-  caveman:
-    type: submodule
-    root: skills
-    harness: agents
