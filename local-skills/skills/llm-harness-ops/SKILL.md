@@ -1,15 +1,13 @@
 ---
 name: llm-harness-ops
-description: >
-  Manage the llm-harness repository: add, move, register, and configure skills
-  and harness homes. Canonical reference lives in docs/llm-harness-ops.md.
+description: Manage ~/.llm-harness — add, move, register, and configure skills and harness homes. Canonical reference lives in docs/llm-harness-ops.md.
 ---
 
 # llm-harness-ops
 
 Use this skill when the user wants to:
 
-- Add a new skill to the llm-harness repository.
+- Add a new skill to ~/.llm-harness.
 - Register a new shared skill submodule source.
 - Move a skill between harnesses or categories.
 - Add or change a harness mapping.
@@ -24,7 +22,7 @@ Always prefer the canonical operational guide:
 
 - `llm-harness` symlinks skills directly from configured sources into `~/.<harness>/skills/`.
 - Skill sources are declared in `config.yaml` under `sources:`.
-- A source has `type: submodule` (git submodule, updated by `./harness.py update-skills`) or `type: local` (directory in this repo, ignored by `./harness.py update-skills`).
+- A source has `type: submodule` (git submodule, updated by `./harness.py update-skills`) or `type: local` (directory in `~/.llm-harness`, ignored by `./harness.py update-skills`).
 - Default harness mappings live in `harness-paths.yaml` or built-in defaults.
 - Nested category paths inside a source are preserved when symlinking.
 - Later sources in `config.yaml` win on target-path collision.

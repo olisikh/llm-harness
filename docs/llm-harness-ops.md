@@ -1,6 +1,6 @@
 ---
 title: LLM Harness Operations Guide
-summary: How to add, move, register, and configure skills and harness homes in the llm-harness repository.
+summary: How to add, move, register, and configure skills and harness homes in ~/.llm-harness.
 tags:
   - llm-harness
   - operations
@@ -205,7 +205,7 @@ ls -la ~/.claude/skills/my-claude-skill
 
 Use this when skills live in an external repository you want to track.
 
-1. Add the repository as a git submodule at the repo root.
+1. Add the repository as a git submodule at `~/.llm-harness`.
 2. Add a `sources:` entry in `config.yaml` with `type: submodule`.
 3. Set `root` and default `harness`.
 4. Add overrides for any skills that belong to a different harness.
@@ -334,7 +334,7 @@ Safe to run repeatedly. It warns and skips when a target path already exists and
 
 ### `harness.py uninstall`
 
-Removes all symlinks managed by this repo. For skill directories it removes any symlink under `~/.<harness>/skills/` that resolves into the repo root. For non-skill harness entries it removes symlinks that point to the matching source in `harness/`.
+Removes all symlinks managed by `~/.llm-harness`. For skill directories it removes any symlink under `~/.<harness>/skills/` that resolves into `~/.llm-harness`. For non-skill harness entries it removes symlinks that point to the matching source in `harness/`.
 
 ```bash
 ./harness.py uninstall

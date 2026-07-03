@@ -1,6 +1,6 @@
 ---
 name: skill-creator
-description: Universal guide for creating and maintaining skills in the ~/llm-harness repository. Use when the user wants to create a new skill, update an existing skill, package a skill, or move a skill between harnesses.
+description: Universal guide for creating and maintaining skills in ~/.llm-harness. Use when the user wants to create a new skill, update an existing skill, package a skill, or move a skill between harnesses.
 license: Complete terms in LICENSE.txt
 ---
 
@@ -10,7 +10,7 @@ This skill guides creation and maintenance of skills for any runtime that loads 
 
 ## Start Here
 
-Before creating or editing a skill, read `AGENTS.md` in the repository root. It contains rules that govern this repository.
+Before creating or editing a skill, read `AGENTS.md` in `~/.llm-harness`. It contains rules that govern `~/.llm-harness`.
 
 ## About Skills
 
@@ -38,7 +38,7 @@ skill-name/
 
 ## Repository Layout
 
-All skills for this workspace must live in `~/llm-harness`. Do not create skills outside this repository.
+All skills for this workspace must live in `~/.llm-harness`. Do not create skills outside `~/.llm-harness`.
 
 Place skills according to scope:
 
@@ -53,7 +53,7 @@ Source directories under `local-skills/` are discovered automatically by `harnes
 After editing, run:
 
 ```bash
-cd ~/llm-harness && ./harness.py install
+cd ~/.llm-harness && ./harness.py install
 ```
 
 Then verify with:
@@ -133,7 +133,7 @@ If the skill source is new and not under `local-skills/`, add it to `config.yaml
 Then run:
 
 ```bash
-cd ~/llm-harness && ./harness.py install
+cd ~/.llm-harness && ./harness.py install
 ```
 
 Verify with:
@@ -150,7 +150,7 @@ Use the skill on real tasks, notice gaps, and refine `SKILL.md` or bundled resou
 
 When updating an existing skill:
 
-1. Edit source files in `~/llm-harness`, not installed symlinks in harness homes.
+1. Edit source files in `~/.llm-harness`, not installed symlinks in harness homes.
 2. Run `./harness.py install` to refresh symlinks.
 3. Validate the skill.
 4. Stage, commit, and push changes.

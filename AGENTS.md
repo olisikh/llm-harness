@@ -53,7 +53,7 @@ Only state you cannot verify after searching returns no useful result.
 
 ## 6. Repository Model
 
-- Canonical checkout path is `~/llm-harness`.
+- Canonical checkout path is `~/.llm-harness`.
 - Repo is harness-first.
 - `harness/<name>/` mirrors target harness home for non-skill harness-specific files.
 - `harness/agents/` is portable/default harness and mirrors `~/.agents/`.

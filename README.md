@@ -31,7 +31,7 @@ llm-harness/
 
 ## Install model
 
-Run from repo root:
+Run from `~/.llm-harness`:
 
 ```bash
 ./harness.py install
@@ -91,11 +91,11 @@ Sync rules:
 
 ## Notes
 
-- canonical checkout path is `~/llm-harness`
+- canonical checkout path is `~/.llm-harness`
 - all skill sources are configured in `config.yaml` and symlinked directly to target harness homes
-- shared skill submodules install from `~/llm-harness/<submodule>`
-- local first-party skill sources live under `~/llm-harness/local-skills/skills`
-- harness-specific non-skill files live under `~/llm-harness/harness/<name>/`
+- shared skill submodules install from `~/.llm-harness/<submodule>`
+- local first-party skill sources live under `~/.llm-harness/local-skills/skills`
+- harness-specific non-skill files live under `~/.llm-harness/harness/<name>/`
 - Hermes package-bundled skills stay in the Hermes install/source tree, not in `llm-harness`
 - OpenCode will discover both `~/.agents/skills` and `~/.config/opencode/skills`
 - Claude portable-skill auto-discovery is deferred for now
