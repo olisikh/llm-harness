@@ -91,8 +91,12 @@ Current conventions:
 
 After changing shared-sync or install behavior, verify with:
 
-1. `bash -n install.sh`
-2. `bash -n uninstall.sh`
-3. `bash -n scripts/update-skills.sh`
-4. `./scripts/update-skills.sh [submodule...]`
+1. `python3 -m py_compile harness.py llm_harness/*.py`
+2. `./harness.py update-skills [submodule...]`
+3. `./harness.py install`
+4. `./harness.py uninstall`
 5. `git status --short`
+
+## 10. Operational Guide
+
+For step-by-step recipes on adding skills, registering shared sources, moving skills between harnesses, and troubleshooting, see [docs/llm-harness-ops.md](docs/llm-harness-ops.md). Treat that document as the canonical operational reference for this repo.

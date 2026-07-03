@@ -16,10 +16,13 @@ llm-harness/
 │   └── codex/                 # mirrors ~/.codex/
 ├── local-skills/              # local first-party skill sources
 │   └── skills/
+│       └── llm-harness-ops/   # skill for managing this repo
+├── docs/
+│   └── llm-harness-ops.md     # canonical operational guide
 ├── harness-paths.yaml         # non-obvious harness root overrides
-├── install.sh
-├── uninstall.sh
-├── scripts/
+├── harness.py                 # unified entrypoint
+├── llm_harness/               # Python implementation
+├── scripts/                   # automation helpers
 ├── obsidian-skills            # shared upstream skill submodule
 ├── mattpocock-skills          # shared upstream skill submodule
 ├── llm-wiki                   # shared upstream skill submodule
@@ -31,12 +34,12 @@ llm-harness/
 Run from repo root:
 
 ```bash
-./install.sh
+./harness.py install
 ```
 
 Installer behavior:
 
-- auto-discovers `harness/*`
+- discovers harnesses from `harness/`, `harness-paths.yaml`, and `config.yaml`
 - maps harness homes by convention:
   - `agents` -> `~/.agents`
   - `claude` -> `~/.claude`
@@ -50,8 +53,14 @@ Installer behavior:
 To remove managed symlinks later:
 
 ```bash
-./uninstall.sh
+./harness.py uninstall
 ```
+
+## Operations
+
+For step-by-step recipes on adding skills, registering shared sources, moving skills between harnesses, and troubleshooting, see [docs/llm-harness-ops.md](docs/llm-harness-ops.md).
+
+There is also a local skill, `llm-harness-ops`, that provides a guided workflow for managing this repository.
 
 ## Skill source sync
 
@@ -64,19 +73,19 @@ Shared skill sources live as git submodules:
 Update submodule pointers with:
 
 ```bash
-./scripts/update-skills.sh
+./harness.py update-skills
 ```
 
 Optional commit/push flow:
 
 ```bash
-./scripts/update-skills.sh --commit --push
+./harness.py update-skills --commit --push
 ```
 
 Sync rules:
 
 - `config.yaml` defines all skill sources under `sources:` with `type: submodule` or `type: local`
-- `update-skills.sh` updates pinned submodule commits only for sources with `type: submodule`; it never creates symlinks inside the repo
+- `harness.py update-skills` updates pinned submodule commits only for sources with `type: submodule`; it never creates symlinks inside the repo
 - install-time mapping of skills to target harness homes is controlled by `config.yaml`
 - later sources in `config.yaml` win on target-path collision
 

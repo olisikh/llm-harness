@@ -1,4 +1,6 @@
 .claude/
+__pycache__/
+*.py[cod]
 
 # Keep hermes skills data out of the repo.
 hermes-state/skills/.usage.json
