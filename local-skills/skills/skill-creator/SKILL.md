@@ -157,6 +157,18 @@ When updating an existing skill:
 
 Follow `AGENTS.md` rules for every change: think before coding, simplicity first, surgical changes, goal-driven execution.
 
+## Portability rules
+
+Skills in this repository must remain host-agnostic. They may be cloned onto machines with different usernames, home directories, or hostnames.
+
+- **Never** use absolute paths that contain a real username, hostname, or machine-specific directory such as `/Users/olisikh/`, `/home/alice/`, or machine names like `olisikh-mbair`.
+- **Never** embed the canonical checkout path `/Users/<name>/.llm-harness` unless it is a generic placeholder like `/Users/<name>/.llm-harness` in explanatory text.
+- When an absolute home path is needed in examples or commands, use `~/...` (e.g. `~/.llm-harness`, `~/.agents/skills/<skill-name>`).
+- For paths inside this repository, use relative paths from the repo root (e.g. `local-skills/skills/<skill-name>/`).
+- Scripts should resolve the repo root at runtime rather than hard-coding it.
+
+Before finishing any skill edit, grep the skill directory for absolute `/Users/`, `/home/`, hostnames, or real usernames and replace them.
+
 ## Quality
 
 For principles on writing tight, predictable skills, consult `writing-great-skills`. Use it only to improve quality; it does not replace this creation workflow.
