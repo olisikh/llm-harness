@@ -51,9 +51,10 @@ llm-harness/
 ├── docs/
 │   └── llm-harness-ops.md     # this file
 ├── harness.py                 # create/update/remove target symlinks and update submodules
-├── obsidian-skills            # shared submodule
-├── mattpocock-skills          # shared submodule
-└── llm-wiki                   # shared submodule
+├── obsidian-skills          # shared submodule
+├── mattpocock-skills        # shared submodule
+├── llm-wiki                 # shared submodule
+└── awesome-llm-skills       # shared submodule
 ```
 
 Never put skill directories under `harness/<name>/skills/`. That location is deprecated; skills now live in configured sources.
@@ -151,7 +152,57 @@ sources:
 A source may have either:
 
 - a single `root` + `harness` at the top level, or
-- a `sources:` list of child sources (used when one submodule hosts skills for multiple harnesses).
+- a `sources:` list of child sources (used when one submodule hosts skills for multiple harnesses or needs different roots).
+
+### Source entry anatomy
+
+Every source entry under `sources:` shares a common shape. Fields at the top level apply to the whole entry; some can also be specified per child source when using `sources:`.
+
+- `type`: either `submodule` or `local`.
+  - `submodule`: tracked as a git submodule; updated by `./harness.py update-skills`.
+  - `local`: a plain directory inside the repo; ignored by `update-skills`.
+- `root`: the subdirectory inside the source directory where skill directories live. The installer walks this root and creates a symlink for every directory that contains a `SKILL.md`.
+- `harness`: the default target harness for every skill found under `root`.
+- `sources`: optional list of child sources. Use this when one submodule needs different roots or default harnesses. Top-level `root`/`harness` are ignored when `sources:` is present.
+- `exclude`: list of relative paths under `root` (or under each child source) to skip. End a folder name with `/` to exclude the whole subtree. Use without `/` to exclude a single skill.
+- `overrides`: map from a skill's relative path under `root` to a different harness. Evaluated after the default `harness`.
+
+Order matters: later sources in `config.yaml` win if two sources produce the same target path.
+
+### Flattening a nested skill group
+
+Some submodules group related skills under an extra directory level. For example, `awesome-llm-skills` keeps document skills under `document-skills/docx`, `document-skills/pdf`, etc. If you used a single source with `root: .`, the installer would create:
+
+```text
+~/.agents/skills/document-skills/docx
+~/.agents/skills/document-skills/pdf
+...
+```
+
+To install them at the top level of `~/.agents/skills/` instead, use two child sources and an `exclude:`:
+
+```yaml
+  awesome-llm-skills:
+    type: submodule
+    exclude:
+      - document-skills/
+    overrides:
+      algorithmic-art: claude
+    sources:
+      - root: .
+        harness: agents
+      - root: document-skills
+        harness: agents
+```
+
+How it works:
+
+1. The first source walks the top level and installs every skill directly under `~/.agents/skills/`.
+2. `exclude: [document-skills/]` tells the first source not to recurse into `document-skills/`, so it does not create `~/.agents/skills/document-skills/...`.
+3. The second source walks only `document-skills/` and installs each skill directly under `~/.agents/skills/`, producing `~/.agents/skills/docx`, `~/.agents/skills/pdf`, etc.
+4. `overrides` routes `algorithmic-art` to the `claude` harness instead of the default `agents`.
+
+This pattern generalizes to any submodule that mixes flat top-level skills with grouped nested skills.
 
 ### `harness-paths.yaml`
 
@@ -233,6 +284,8 @@ Run:
 ./harness.py update-skills acme-skills
 ./harness.py install
 ```
+
+If the submodule groups some skills under an extra directory level (for example `document-skills/docx`), use the flattening pattern described in [Flattening a nested skill group](#flattening-a-nested-skill-group) above.
 
 ### Deprecate skills or a category
 

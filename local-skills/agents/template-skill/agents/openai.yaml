@@ -1,4 +1,0 @@
-interface:
-  display_name: "Template Skill"
-  short_description: "Help with Template Skill tasks and workflows"
-  default_prompt: "Use $template-skill to work on Template Skill tasks."

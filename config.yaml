@@ -43,3 +43,15 @@ sources:
     type: local
     root: .
     harness: hermes
+
+  awesome-llm-skills:
+    type: submodule
+    exclude:
+      - document-skills/
+    overrides:
+      algorithmic-art: claude
+    sources:
+      - root: .
+        harness: agents
+      - root: document-skills
+        harness: agents

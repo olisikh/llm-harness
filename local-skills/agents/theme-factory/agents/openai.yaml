@@ -1,4 +1,0 @@
-interface:
-  display_name: "Theme Factory"
-  short_description: "Help with Theme Factory tasks and workflows"
-  default_prompt: "Use $theme-factory to work on Theme Factory tasks."
