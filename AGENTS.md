@@ -57,7 +57,7 @@ Only state you cannot verify after searching returns no useful result.
 - Repo is harness-first.
 - `harness/<name>/` mirrors target harness home for non-skill harness-specific files.
 - `harness/agents/` is portable/default harness and mirrors `~/.agents/`.
-- Skill sources live in configured upstream submodules and in `local-skills/`; `install.sh` links each directory that contains `SKILL.md`, preserving nested category paths.
+- Skill sources live in configured upstream submodules and in `local-skills/`; `harness.py install` links each directory that contains `SKILL.md`, preserving nested category paths.
 
 Current conventions:
 - `harness/agents` -> `~/.agents`
@@ -73,14 +73,14 @@ Current conventions:
   - `obsidian-skills`
   - `mattpocock-skills`
   - `llm-wiki`
-- `scripts/update-skills.sh` is source of truth for shared skill submodule pointer updates; it only touches sources with `type: submodule`.
+- `./harness.py update-skills` is source of truth for shared skill submodule pointer updates; it only touches sources with `type: submodule`.
 - All configured skill sources install directly to target harness homes according to `config.yaml`.
 - Harness-specific exceptions use explicit overrides in `config.yaml`.
 - Later sources in `config.yaml` win on target-path collision.
 
 ## 8. Installer Rules
 
-- `install.sh` auto-discovers harness directories.
+- `harness.py install` auto-discovers harness directories.
 - Skill sources are read from `config.yaml` and linked with per-skill symlinks, preserving nested category paths.
 - Non-skill top-level harness entries from `harness/<name>/` install as 1:1 symlinks into harness home.
 - Existing non-matching target paths are warnings, not overwrite candidates.
@@ -91,7 +91,7 @@ Current conventions:
 
 After changing shared-sync or install behavior, verify with:
 
-1. `python3 -m py_compile harness.py llm_harness/*.py`
+1. `python3 -m py_compile harness.py lib/*.py`
 2. `./harness.py update-skills [submodule...]`
 3. `./harness.py install`
 4. `./harness.py uninstall`

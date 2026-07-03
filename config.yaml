@@ -9,6 +9,8 @@ sources:
     type: submodule
     root: skills
     harness: agents
+    exclude:
+      - deprecated/
     overrides:
       misc/git-guardrails-claude-code: claude
 
@@ -29,6 +31,5 @@ sources:
     overrides:
       algorithmic-art: claude
       compress: claude
-      skill-creator: claude
       limits: codex
       autonomous-ai-agents/llm-harness-ops: hermes

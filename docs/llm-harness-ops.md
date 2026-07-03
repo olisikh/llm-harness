@@ -47,11 +47,7 @@ llm-harness/
 │   └── skills/
 ├── docs/
 │   └── llm-harness-ops.md     # this file
-├── install.sh                 # create/update target symlinks
-├── uninstall.sh               # remove managed target symlinks
-├── scripts/
-│   ├── update-skills.sh       # update submodule pointers
-│   └── update-agents-repo.sh  # automated pull + update + install
+├── harness.py                 # create/update/remove target symlinks and update submodules
 ├── obsidian-skills            # shared submodule
 ├── mattpocock-skills          # shared submodule
 └── llm-wiki                   # shared submodule
@@ -72,8 +68,8 @@ A source is a top-level key under `sources:` in `config.yaml`. It points at a di
 
 ### Type
 
-- `type: submodule` — `update-skills.sh` will fetch and update the pinned commit. `install.sh` symlinks skills from `repo/<source-name>/<root>`.
-- `type: local` — `update-skills.sh` ignores it. `install.sh` symlinks skills from `repo/<source-name>/<root>`.
+- `type: submodule` — `./harness.py update-skills` will fetch and update the pinned commit. `./harness.py install` symlinks skills from `repo/<source-name>/<root>`.
+- `type: local` — `./harness.py update-skills` ignores it. `./harness.py install` symlinks skills from `repo/<source-name>/<root>`.
 
 ### Root
 
@@ -170,7 +166,7 @@ Use this when the skill is private, experimental, or specific to your setup.
    - Flat: `local-skills/skills/my-skill/SKILL.md`
    - Nested: `local-skills/skills/category/my-skill/SKILL.md`
 3. If the skill is not for `agents`, add an override to `config.yaml` under `local-skills:`.
-4. Run `./install.sh`.
+4. Run `./harness.py install`.
 5. Verify the symlink in the target harness `skills/` directory.
 
 Example: add a Claude-only skill called `my-claude-skill`.
@@ -201,7 +197,7 @@ Edit `config.yaml`:
 Run:
 
 ```bash
-./install.sh
+./harness.py install
 ls -la ~/.claude/skills/my-claude-skill
 ```
 
@@ -213,8 +209,8 @@ Use this when skills live in an external repository you want to track.
 2. Add a `sources:` entry in `config.yaml` with `type: submodule`.
 3. Set `root` and default `harness`.
 4. Add overrides for any skills that belong to a different harness.
-5. Run `./scripts/update-skills.sh` to initialize and pin the submodule.
-6. Run `./install.sh` to create target symlinks.
+5. Run `./harness.py update-skills <source-name>` to initialize and pin the submodule.
+6. Run `./harness.py install` to create target symlinks.
 
 Example: add a new submodule `acme-skills`.
 
@@ -236,9 +232,33 @@ Edit `config.yaml`:
 Run:
 
 ```bash
-./scripts/update-skills.sh acme-skills
-./install.sh
+./harness.py update-skills acme-skills
+./harness.py install
 ```
+
+### Deprecate skills or a category
+
+To stop installing a skill, add its relative path under the source's `exclude:` list. To exclude an entire category folder, end the entry with `/`.
+
+Example: exclude all skills under `mattpocock-skills/skills/deprecated/`.
+
+```yaml
+  mattpocock-skills:
+    type: submodule
+    root: skills
+    harness: agents
+    exclude:
+      - deprecated/
+```
+
+To deprecate a single skill, use its full relative path without a trailing slash:
+
+```yaml
+    exclude:
+      - deprecated/skill-name
+```
+
+Then run `./harness.py install`. Existing target symlinks for excluded skills will be removed automatically.
 
 ### Move a skill to another harness
 
@@ -253,7 +273,7 @@ Example: move `local-skills/skills/old-agents-skill` to Claude.
       old-agents-skill: claude
 ```
 
-Then run `./install.sh`. The old symlink in `~/.agents/skills/old-agents-skill` will be removed and a new one created at `~/.claude/skills/old-agents-skill`.
+Then run `./harness.py install`. The old symlink in `~/.agents/skills/old-agents-skill` will be removed and a new one created at `~/.claude/skills/old-agents-skill`.
 
 ### Add a new harness
 
@@ -261,7 +281,7 @@ Then run `./install.sh`. The old symlink in `~/.agents/skills/old-agents-skill` 
 2. Add any harness-specific files (e.g. `CLAUDE.md` for Claude).
 3. If the default install path `~/.<name>` is wrong, add an entry to `harness-paths.yaml`.
 4. Reference the harness in `config.yaml` overrides or source `harness` values.
-5. Run `./install.sh`.
+5. Run `./harness.py install`.
 
 Example: add `gemini` harness targeting `~/.gemini`.
 
@@ -283,7 +303,7 @@ Then add skills for it in `config.yaml`.
 
 ### Add a new harness root path
 
-If a harness home lives somewhere other than `~/.<name>`, add it to `harness-paths.yaml`. Do not hard-code unusual paths in `install.sh`.
+If a harness home lives somewhere other than `~/.<name>`, add it to `harness-paths.yaml`. Do not hard-code unusual paths in `harness.py install`.
 
 ```yaml
 harness:
@@ -294,7 +314,7 @@ harness:
 ### Remove a skill
 
 1. Delete the skill source directory (or remove its override if it is excluded from install).
-2. Run `./install.sh`. Stale target symlinks will be removed automatically.
+2. Run `./harness.py install`. Stale target symlinks will be removed automatically.
 
 For shared submodule skills you no longer want at all, also remove the override or source entry from `config.yaml`.
 
@@ -334,15 +354,19 @@ Updates pinned commits for every source with `type: submodule` in `config.yaml`.
 
 Pulls the latest `llm-harness` repo, runs `update-skills --commit --push`, then runs `install`. Intended for cron or periodic automation.
 
+```bash
+./harness.py update-repo
+```
+
 ## Troubleshooting
 
-### `install.sh` skips a skill with "Skipping existing path"
+### `harness.py install` skips a skill with "Skipping existing path"
 
 A real file or directory already exists at the target path. Decide whether to back it up and remove it, or rename your skill.
 
-### `install.sh` skips a skill with "Skipping existing symlink (points elsewhere)"
+### `harness.py install` skips a skill with "Skipping existing symlink (points elsewhere)"
 
-The target is already a symlink to a path outside this repo. Back it up or remove it manually, then re-run `install.sh`.
+The target is already a symlink to a path outside this repo. Back it up or remove it manually, then re-run `./harness.py install`.
 
 ### A skill appears under the wrong harness
 
@@ -352,11 +376,11 @@ Check `config.yaml`:
 - Is there an `overrides:` entry for the skill's relative path?
 - If two sources define the same target path, the later source in `config.yaml` wins.
 
-### `update-skills.sh` says a submodule is not configured
+### `harness.py update-skills` says a submodule is not configured
 
 Only sources with `type: submodule` in `config.yaml` are updated. If a submodule is new, add it to `config.yaml` first.
 
 ### Machine-specific symlink targets appear in git status
 
-This means an intermediate symlink inside the repo is still tracked. Skills must never be symlinked inside `harness/<name>/skills/`; they must be real directories or live in configured sources. If you see a tracked symlink under `harness/`, remove it and rely on `install.sh` to create the target-home symlink directly.
+This means an intermediate symlink inside the repo is still tracked. Skills must never be symlinked inside `harness/<name>/skills/`; they must be real directories or live in configured sources. If you see a tracked symlink under `harness/`, remove it and rely on `./harness.py install` to create the target-home symlink directly.
 

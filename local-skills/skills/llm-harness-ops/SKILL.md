@@ -24,7 +24,7 @@ Always prefer the canonical operational guide:
 
 - `llm-harness` symlinks skills directly from configured sources into `~/.<harness>/skills/`.
 - Skill sources are declared in `config.yaml` under `sources:`.
-- A source has `type: submodule` (git submodule, updated by `update-skills.sh`) or `type: local` (directory in this repo, ignored by `update-skills.sh`).
+- A source has `type: submodule` (git submodule, updated by `./harness.py update-skills`) or `type: local` (directory in this repo, ignored by `./harness.py update-skills`).
 - Default harness mappings live in `harness-paths.yaml` or built-in defaults.
 - Nested category paths inside a source are preserved when symlinking.
 - Later sources in `config.yaml` win on target-path collision.
@@ -36,7 +36,7 @@ Always prefer the canonical operational guide:
 1. Ask the user: target harness, category (optional), skill name.
 2. Create `local-skills/skills/<category>/<skill-name>/SKILL.md`.
 3. If target harness is not `agents`, add an override to `config.yaml` under `local-skills:`.
-4. Run `./install.sh`.
+4. Run `./harness.py install`.
 5. Verify with `ls -la ~/.<harness>/skills/<category>/<skill-name>`.
 
 ### Register a shared skill submodule
@@ -45,25 +45,41 @@ Always prefer the canonical operational guide:
 2. Run `git submodule add <url> <source-name>`.
 3. Add a `sources:` entry in `config.yaml` with `type: submodule`.
 4. Add overrides for any skills that go to a different harness.
-5. Run `./scripts/update-skills.sh <source-name>`.
-6. Run `./install.sh`.
+5. Run `./harness.py update-skills <source-name>`.
+6. Run `./harness.py install`.
 
 ### Move a skill
 
 1. If local: move the directory under `local-skills/skills/` if needed.
 2. Update the override in `config.yaml` for the skill's relative path.
-3. Run `./install.sh`.
+3. Run `./harness.py install`.
+
+### Deprecate skills or a category
+
+1. Add the skill's relative path, or a category path ending with `/`, to the source's `exclude:` list in `config.yaml`.
+2. Run `./harness.py install`.
+
+Example: exclude all `deprecated/` skills from a shared source.
+
+```yaml
+  mattpocock-skills:
+    type: submodule
+    root: skills
+    harness: agents
+    exclude:
+      - deprecated/
+```
 
 ### Add or change a harness path
 
 1. Edit `harness-paths.yaml`.
-2. Run `./install.sh`.
+2. Run `./harness.py install`.
 
 ## Verification checklist
 
 After any structural change:
 
-1. `python3 -m py_compile harness.py llm_harness/*.py`
+1. `python3 -m py_compile harness.py lib/*.py`
 2. `./harness.py update-skills [submodule...]`
 3. `./harness.py install`
 4. `./harness.py uninstall`
@@ -100,4 +116,4 @@ description: <one-line description>
 - Do not put skills under `harness/<name>/skills/`.
 - Do not track symlinks inside `harness/`.
 - Do not edit files inside submodules directly unless you intend to fork them.
-- Do not run `install.sh` without first checking for existing real files at target paths.
+- Do not run `./harness.py install` without first checking for existing real files at target paths.

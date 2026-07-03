@@ -97,12 +97,20 @@ class Config:
                 if not source_root.exists():
                     continue
 
+                def _is_excluded(rel: str) -> bool:
+                    if rel in excludes:
+                        return True
+                    for pattern in excludes:
+                        if pattern.endswith("/") and rel.startswith(pattern):
+                            return True
+                    return False
+
                 for current_root, dirs, files in os.walk(source_root, followlinks=False):
                     dirs.sort()
                     files.sort()
                     if "SKILL.md" in files:
                         rel = os.path.relpath(current_root, source_root)
-                        if rel in excludes:
+                        if _is_excluded(rel):
                             dirs.clear()
                             continue
                         harness = overrides.get(rel, default_harness)

@@ -4,19 +4,19 @@ Use this reference when replacing an old standalone `~/.agents` checkout with a 
 
 ## Proven sequence
 
-1. Run old uninstall from the old repo root:
+1. Run old uninstall from the old repo root if it has one (for `llm-harness` use `./harness.py uninstall`):
    ```bash
    cd ~/.agents
    bash ./uninstall.sh
    ```
 2. Remove the retired source tree only after uninstall finishes.
 3. Clone the new harness repo into the user-requested location.
-4. Run `bash ./install.sh` from the new repo root.
+4. Run `./harness.py install` from the new repo root.
 5. Verify representative realpaths.
 6. If `~/.skills` exists and the user does not want it, remove the legacy chain and reinstall:
    - remove `~/.claude/skills` first when it points to `~/.skills`
    - remove `~/.skills`
-   - rerun `bash ./install.sh`
+   - rerun `./harness.py install`
    - verify `~/.claude/skills` is now a normal directory
 7. Prune any stale `~/.agents/skills/*` symlinks that still resolve into `harness/claude/skills`.
 
