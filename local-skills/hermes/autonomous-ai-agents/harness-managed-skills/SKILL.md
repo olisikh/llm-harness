@@ -33,9 +33,12 @@ Do not use this for one-off temporary personal notes that should remain local-on
 ## Core Rules
 
 1. Treat `~/.llm-harness` as canonical.
-2. Put first-party source skills under `~/.llm-harness/local-skills/skills/...`.
-   - default target harness: `agents`
-   - for `claude`, `codex`, `hermes`, or `opencode`, keep the source under `local-skills/skills/...` and route it with `config.yaml` overrides
+2. Put first-party source skills under `~/.llm-harness/local-skills/<harness>/...`.
+   - portable skills: `local-skills/agents/`
+   - Claude-only skills: `local-skills/claude/`
+   - Codex-only skills: `local-skills/codex/`
+   - Hermes-only skills: `local-skills/hermes/<category>/`
+   - OpenCode-only skills: `local-skills/opencode/` (when needed)
    - use `harness/<name>/` only for non-skill harness-specific files such as `CLAUDE.md`
 3. Prefer editing repo source, not installed runtime copies.
 4. After creating, moving, or editing skills, run `cd ~/.llm-harness && ./harness.py install` so harness homes refresh.
@@ -45,7 +48,7 @@ Do not use this for one-off temporary personal notes that should remain local-on
 
 Hermes skills may need nested category paths in the installed runtime tree, for example:
 
-- source: `~/.llm-harness/local-skills/skills/autonomous-ai-agents/hermes-agent/...`
+- source: `~/.llm-harness/local-skills/hermes/autonomous-ai-agents/hermes-agent/...`
 - install target: `~/.hermes/skills/autonomous-ai-agents/hermes-agent`
 
 The installer must preserve nested category paths by linking every directory containing `SKILL.md`, not only direct children of `skills/`.
@@ -53,8 +56,8 @@ The installer must preserve nested category paths by linking every directory con
 ## Workflow
 
 1. Identify which harness should receive the installed skill.
-2. Create or update the physical source under `~/.llm-harness/local-skills/skills/...`.
-3. If the skill belongs somewhere other than the default `agents` harness, add or update the `local-skills` override in `~/.llm-harness/config.yaml`.
+2. Create or update the physical source under `~/.llm-harness/local-skills/<harness>/...`.
+3. If the skill belongs somewhere other than the default `agents` harness, place it in the matching `local-skills/<harness>/` directory.
 4. If instructions or references still point to old canonical paths, patch them in the same session.
 5. Re-run `cd ~/.llm-harness && ./harness.py install`.
 6. Verify installed runtime paths resolve back into `~/.llm-harness`.
@@ -73,8 +76,8 @@ The installer must preserve nested category paths by linking every directory con
 
 ## Verification Checklist
 
-- [ ] Skill source lives under `~/.llm-harness/local-skills/skills/...`
-- [ ] Any non-default target harness routing is declared in `~/.llm-harness/config.yaml`
+- [ ] Skill source lives under `~/.llm-harness/local-skills/<harness>/...`
+- [ ] Target harness matches the `local-skills/<harness>/` directory
 - [ ] Installed runtime path exists where expected
 - [ ] Installed runtime path is a symlink or managed install target resolving into `~/.llm-harness`
 - [ ] `cd ~/.llm-harness && ./harness.py install` has been run after changes

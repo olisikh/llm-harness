@@ -32,10 +32,9 @@ Always prefer the canonical operational guide:
 ### Add a local skill
 
 1. Ask the user: target harness, category (optional), skill name.
-2. Create `local-skills/skills/<category>/<skill-name>/SKILL.md`.
-3. If target harness is not `agents`, add an override to `config.yaml` under `local-skills:`.
-4. Run `./harness.py install`.
-5. Verify with `ls -la ~/.<harness>/skills/<category>/<skill-name>`.
+2. Create `local-skills/<harness>/<category>/<skill-name>/SKILL.md`.
+3. Run `./harness.py install`.
+4. Verify with `ls -la ~/.<harness>/skills/<category>/<skill-name>`.
 
 ### Register a shared skill submodule
 
@@ -48,9 +47,8 @@ Always prefer the canonical operational guide:
 
 ### Move a skill
 
-1. If local: move the directory under `local-skills/skills/` if needed.
-2. Update the override in `config.yaml` for the skill's relative path.
-3. Run `./harness.py install`.
+1. If local: move the directory from `local-skills/<old-harness>/` to `local-skills/<new-harness>/`.
+2. Run `./harness.py install`.
 
 ### Deprecate skills or a category
 

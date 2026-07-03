@@ -25,7 +25,7 @@ This document is the canonical reference for changing the shape of the `llm-harn
 Skill sources are declared in `config.yaml`. They can be:
 
 - `type: submodule` — shared upstream skill repositories tracked as git submodules.
-- `type: local` — first-party skills that live inside this repo, under `local-skills/`.
+- `type: local` — first-party skills that live inside this repo, under `local-skills/<harness>/`.
 
 The repo does **not** copy skill files around. It creates symlinks from the target harness home directly to the source directory. This keeps the repo portable and avoids machine-specific paths in tracked files.
 
@@ -44,7 +44,10 @@ llm-harness/
 │   ├── hermes/
 │   └── opencode/
 ├── local-skills/              # local first-party skill sources
-│   └── skills/
+│   ├── agents/                # portable skills
+│   ├── claude/                # Claude-only skills
+│   ├── codex/                 # Codex-only skills
+│   └── hermes/                # Hermes-only skills
 ├── docs/
 │   └── llm-harness-ops.md     # this file
 ├── harness.py                 # create/update/remove target symlinks and update submodules
@@ -64,7 +67,7 @@ Harness directories under `harness/` are optional. The install/uninstall logic d
 A source is a top-level key under `sources:` in `config.yaml`. It points at a directory inside the repo. Example source names:
 
 - `obsidian-skills` — a git submodule directory.
-- `local-skills` — a local directory inside the repo.
+- `local-skills/agents` — a local directory inside the repo targeting the `agents` harness.
 
 ### Type
 
@@ -124,16 +127,25 @@ sources:
       - root: plugins/llm-wiki/skills
         harness: codex
 
-  local-skills:
+  local-skills/agents:
     type: local
-    root: skills
+    root: .
     harness: agents
-    overrides:
-      algorithmic-art: claude
-      compress: claude
-      skill-creator: claude
-      limits: codex
-      autonomous-ai-agents/llm-harness-ops: hermes
+
+  local-skills/claude:
+    type: local
+    root: .
+    harness: claude
+
+  local-skills/codex:
+    type: local
+    root: .
+    harness: codex
+
+  local-skills/hermes:
+    type: local
+    root: .
+    harness: hermes
 ```
 
 A source may have either:
@@ -161,37 +173,23 @@ Only add entries here for harnesses that do not use the default path.
 Use this when the skill is private, experimental, or specific to your setup.
 
 1. Choose a target harness and category.
-   - Default is `agents`. Use overrides for other harnesses.
-2. Create the skill directory under `local-skills/skills/`.
-   - Flat: `local-skills/skills/my-skill/SKILL.md`
-   - Nested: `local-skills/skills/category/my-skill/SKILL.md`
-3. If the skill is not for `agents`, add an override to `config.yaml` under `local-skills:`.
-4. Run `./harness.py install`.
-5. Verify the symlink in the target harness `skills/` directory.
+2. Create the skill directory under `local-skills/<harness>/`.
+   - Flat: `local-skills/agents/my-skill/SKILL.md`
+   - Nested: `local-skills/hermes/category/my-skill/SKILL.md`
+3. Run `./harness.py install`.
+4. Verify the symlink in the target harness `skills/` directory.
 
 Example: add a Claude-only skill called `my-claude-skill`.
 
 ```bash
-mkdir -p local-skills/skills/my-claude-skill
-cat > local-skills/skills/my-claude-skill/SKILL.md <<'EOF'
+mkdir -p local-skills/claude/my-claude-skill
+cat > local-skills/claude/my-claude-skill/SKILL.md <<'EOF'
 ---
 name: my-claude-skill
 description: A custom Claude skill.
 ---
 # my-claude-skill
 EOF
-```
-
-Edit `config.yaml`:
-
-```yaml
-  local-skills:
-    type: local
-    root: skills
-    harness: agents
-    overrides:
-      # ... existing overrides ...
-      my-claude-skill: claude
 ```
 
 Run:
@@ -262,15 +260,12 @@ Then run `./harness.py install`. Existing target symlinks for excluded skills wi
 
 ### Move a skill to another harness
 
-If the skill is in a shared submodule, add or change an override in `config.yaml`. If the skill is local, move its directory under `local-skills/skills/` and update the override.
+If the skill is in a shared submodule, add or change an override in `config.yaml`. If the skill is local, move its directory from `local-skills/<old-harness>/` to `local-skills/<new-harness>/`.
 
-Example: move `local-skills/skills/old-agents-skill` to Claude.
+Example: move `local-skills/agents/old-agents-skill` to Claude.
 
-```yaml
-  local-skills:
-    # ...
-    overrides:
-      old-agents-skill: claude
+```bash
+mv local-skills/agents/old-agents-skill local-skills/claude/
 ```
 
 Then run `./harness.py install`. The old symlink in `~/.agents/skills/old-agents-skill` will be removed and a new one created at `~/.claude/skills/old-agents-skill`.

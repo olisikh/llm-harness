@@ -5,9 +5,9 @@ Use this when a session establishes, migrates, or repairs the central-skills wor
 ## Canonical layout
 
 - Repo root: `~/.llm-harness`
-- First-party skill source tree: `~/.llm-harness/local-skills/skills/<category>/<skill>`
-- Default local-skills target harness: `agents`
-- Hermes-targeted exceptions are declared under `local-skills.overrides` in `~/.llm-harness/config.yaml`
+- Portable skill source tree: `~/.llm-harness/local-skills/agents/<skill>`
+- Hermes skill source tree: `~/.llm-harness/local-skills/hermes/<category>/<skill>`
+- Target harness is determined by the `local-skills/<harness>/` directory, not by overrides
 - Runtime install tree: `~/.hermes/skills/<category>/<skill>`
 
 ## Required installer behavior
@@ -26,8 +26,8 @@ If a scheduled job keeps `~/.llm-harness` current, it should:
 ## Verification recipe
 
 1. Check that canonical repo paths exist.
-2. Confirm the skill source lives under `~/.llm-harness/local-skills/skills/...`.
-3. Confirm any Hermes-targeted skill has the appropriate `local-skills.overrides` entry in `~/.llm-harness/config.yaml`.
+2. Confirm the skill source lives under `~/.llm-harness/local-skills/<harness>/...`.
+3. Confirm any Hermes-targeted skill is under `~/.llm-harness/local-skills/hermes/`.
 4. Run `cd ~/.llm-harness && ./harness.py install`.
 5. Verify runtime paths resolve into the repo, for example:
    - `~/.hermes/skills/autonomous-ai-agents/harness-managed-skills`

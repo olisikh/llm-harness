@@ -15,8 +15,10 @@ llm-harness/
 │   ├── hermes/                # mirrors ~/.hermes/
 │   └── codex/                 # mirrors ~/.codex/
 ├── local-skills/              # local first-party skill sources
-│   └── skills/
-│       └── llm-harness-ops/   # skill for managing this repo
+│   ├── agents/                # portable skills → ~/.agents/skills/
+│   ├── claude/                # Claude-only skills → ~/.claude/skills/
+│   ├── codex/                 # Codex-only skills → ~/.codex/skills/
+│   └── hermes/                # Hermes-only skills → ~/.hermes/skills/
 ├── docs/
 │   └── llm-harness-ops.md     # canonical operational guide
 ├── harness-paths.yaml         # non-obvious harness root overrides
@@ -45,7 +47,7 @@ Installer behavior:
   - `claude` -> `~/.claude`
   - `codex` -> `~/.codex`
 - reads `harness-paths.yaml` for non-obvious roots like OpenCode and custom Hermes skill installs
-- reads `config.yaml` to symlink all configured skill sources (submodules and `local-skills/`) directly under target `skills/`, preserving nested category paths
+- reads `config.yaml` to symlink all configured skill sources (submodules and `local-skills/<harness>/`) directly under target `skills/`, preserving nested category paths
 - symlinks non-skill top-level files and directories from `harness/<name>/` 1:1 into target harness home
 - removes stale managed symlinks
 - warns and skips when target path already exists and is not matching expected symlink
@@ -94,7 +96,7 @@ Sync rules:
 - canonical checkout path is `~/.llm-harness`
 - all skill sources are configured in `config.yaml` and symlinked directly to target harness homes
 - shared skill submodules install from `~/.llm-harness/<submodule>`
-- local first-party skill sources live under `~/.llm-harness/local-skills/skills`
+- local first-party skill sources live under `~/.llm-harness/local-skills/<harness>/`
 - harness-specific non-skill files live under `~/.llm-harness/harness/<name>/`
 - Hermes package-bundled skills stay in the Hermes install/source tree, not in `llm-harness`
 - OpenCode will discover both `~/.agents/skills` and `~/.config/opencode/skills`

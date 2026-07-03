@@ -24,12 +24,22 @@ sources:
       - root: plugins/llm-wiki/skills
         harness: codex
 
-  local-skills:
+  local-skills/agents:
     type: local
-    root: skills
+    root: .
     harness: agents
-    overrides:
-      algorithmic-art: claude
-      compress: claude
-      autonomous-ai-agents/harness-managed-skills: hermes
-      autonomous-ai-agents/llm-harness-ops: hermes
+
+  local-skills/claude:
+    type: local
+    root: .
+    harness: claude
+
+  local-skills/codex:
+    type: local
+    root: .
+    harness: codex
+
+  local-skills/hermes:
+    type: local
+    root: .
+    harness: hermes

@@ -57,7 +57,7 @@ Only state you cannot verify after searching returns no useful result.
 - Repo is harness-first.
 - `harness/<name>/` mirrors target harness home for non-skill harness-specific files.
 - `harness/agents/` is portable/default harness and mirrors `~/.agents/`.
-- Skill sources live in configured upstream submodules and in `local-skills/`; `harness.py install` links each directory that contains `SKILL.md`, preserving nested category paths.
+- Skill sources live in configured upstream submodules and in `local-skills/<harness>/`; `harness.py install` links each directory that contains `SKILL.md`, preserving nested category paths.
 
 Current conventions:
 - `harness/agents` -> `~/.agents`

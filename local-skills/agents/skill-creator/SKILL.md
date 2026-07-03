@@ -42,12 +42,14 @@ All skills for this workspace must live in `~/.llm-harness`. Do not create skill
 
 Place skills according to scope:
 
-- New first-party skills should live under `local-skills/skills/<skill-name>/` or `local-skills/skills/<category>/<skill-name>/`.
-- The default target harness for `local-skills` is `agents`.
-- If a skill should install to `claude`, `codex`, `hermes`, or `opencode`, keep the source under `local-skills/skills/...` and add an override under `local-skills:` in `config.yaml`.
+- Portable skills: `local-skills/agents/<skill-name>/`
+- Claude-only skills: `local-skills/claude/<skill-name>/`
+- Codex-only skills: `local-skills/codex/<skill-name>/`
+- Hermes-only skills: `local-skills/hermes/<category>/<skill-name>/`
+- OpenCode-only skills: `local-skills/opencode/<skill-name>/` (when needed)
 - Use `harness/<name>/` only for non-skill harness-specific files such as `CLAUDE.md`, not as the primary source location for skills.
 
-Source directories under `local-skills/` are discovered automatically by `harness.py install`. Submodules and harness-specific overrides are declared in `config.yaml`.
+Each `local-skills/<harness>/` directory is a separate source in `config.yaml` with the matching `harness` target. No overrides are needed for local skills.
 
 After editing, run:
 
@@ -163,7 +165,7 @@ Skills in this repository must remain host-agnostic. They may be cloned onto mac
 - **Never** use absolute paths that contain a real username, hostname, or machine-specific directory such as `/Users/olisikh/`, `/home/alice/`, or machine names like `olisikh-mbair`.
 - **Never** embed the canonical checkout path `/Users/<name>/.llm-harness` unless it is a generic placeholder like `/Users/<name>/.llm-harness` in explanatory text.
 - When an absolute home path is needed in examples or commands, use `~/...` (e.g. `~/.llm-harness`, `~/.agents/skills/<skill-name>`).
-- For paths inside this repository, use relative paths from the repo root (e.g. `local-skills/skills/<skill-name>/`).
+- For paths inside this repository, use relative paths from the repo root (e.g. `local-skills/agents/<skill-name>/`).
 - Scripts should resolve the repo root at runtime rather than hard-coding it.
 
 Before finishing any skill edit, grep the skill directory for absolute `/Users/`, `/home/`, hostnames, or real usernames and replace them.
