@@ -31,5 +31,4 @@ sources:
     overrides:
       algorithmic-art: claude
       compress: claude
-      limits: codex
       autonomous-ai-agents/llm-harness-ops: hermes

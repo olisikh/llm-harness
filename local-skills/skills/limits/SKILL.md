@@ -10,7 +10,7 @@ Use this skill when asked for current LLM limits, quota, remaining capacity, or 
 ## Default command
 
 ```bash
-python ~/.codex/skills/limits/scripts/limits.py
+python ~/.agents/skills/limits/scripts/limits.py
 ```
 
 ## Output format (set in stone)
@@ -41,13 +41,13 @@ Every line follows this exact template — no markers, no extra text:
 ## Options
 
 ```bash
-python ~/.codex/skills/limits/scripts/limits.py --provider codex --provider opencodego
-python ~/.codex/skills/limits/scripts/limits.py --json
+python ~/.agents/skills/limits/scripts/limits.py --provider codex --provider opencodego
+python ~/.agents/skills/limits/scripts/limits.py --json
 ```
 
 ## Notes
 
-- Strip `CODEX_HOME` before invoking CodexBar so isolated Codex homes do not break Codex CLI usage reads.
-- Codex should use codexbar `--source cli`; the web source can hang.
+- Strip `CODEX_HOME` before invoking CodexBar so isolated homes do not break Codex CLI usage reads.
+- The `codex` provider should use codexbar `--source cli`; the web source can hang.
 - Provider errors should be printed as short status lines only when that provider was explicitly requested or no successful limits were found.
 - Skill name is `limits`; in Hermes skill-slash form this is intended to be `/limits`.
