@@ -1,4 +1,0 @@
-interface:
-  display_name: "Caveman Review"
-  short_description: "Help with Caveman Review tasks and workflows"
-  default_prompt: "Use $caveman-review to work on Caveman Review tasks."

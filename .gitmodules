@@ -10,3 +10,6 @@
 [submodule "awesome-llm-skills"]
 	path = awesome-llm-skills
 	url = https://github.com/Prat011/awesome-llm-skills.git
+[submodule "caveman"]
+	path = caveman
+	url = https://github.com/juliusbrussee/caveman.git

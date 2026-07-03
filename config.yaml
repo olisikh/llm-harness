@@ -55,3 +55,8 @@ sources:
         harness: agents
       - root: document-skills
         harness: agents
+
+  caveman:
+    type: submodule
+    root: skills
+    harness: agents
