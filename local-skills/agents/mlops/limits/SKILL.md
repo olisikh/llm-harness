@@ -1,6 +1,6 @@
 ---
 name: limits
-description: Check remaining LLM quota windows for CodexBar-enabled providers, formatted concisely for humans.
+description: Check remaining LLM quota windows for CodexBar-enabled providers, formatted concisely for humans. This is a general CodexBar usage skill, not a Codex-specific skill.
 ---
 
 # Limits
@@ -10,16 +10,18 @@ Use this skill when asked for current LLM limits, quota, remaining capacity, or 
 ## Default command
 
 ```bash
-python ~/.agents/skills/limits/scripts/limits.py
+python ~/.agents/skills/mlops/limits/scripts/limits.py
 ```
 
 ## Output format (set in stone)
 
-Every line follows this exact template — no markers, no extra text:
+Every provider line follows this exact template:
 
 ```text
 <ProviderLabel>: <remaining>%/5h <remaining>%/7d <remaining>%/30d
 ```
+
+When the delivery channel supports Markdown, enclose the complete limits output in one fenced `text` code block. Otherwise, emit the provider lines as plain text.
 
 **Provider labels (fixed):**
 | Data provider | Label |
@@ -41,8 +43,8 @@ Every line follows this exact template — no markers, no extra text:
 ## Options
 
 ```bash
-python ~/.agents/skills/limits/scripts/limits.py --provider codex --provider opencodego
-python ~/.agents/skills/limits/scripts/limits.py --json
+python ~/.agents/skills/mlops/limits/scripts/limits.py --provider codex --provider opencodego
+python ~/.agents/skills/mlops/limits/scripts/limits.py --json
 ```
 
 ## Notes
@@ -51,3 +53,4 @@ python ~/.agents/skills/limits/scripts/limits.py --json
 - The `codex` provider should use codexbar `--source cli`; the web source can hang.
 - Provider errors should be printed as short status lines only when that provider was explicitly requested or no successful limits were found.
 - Skill name is `limits`; in Hermes skill-slash form this is intended to be `/limits`.
+- The canonical source path is `~/.llm-harness/local-skills/agents/mlops/limits`; the installed runtime path is `~/.agents/skills/mlops/limits`.
