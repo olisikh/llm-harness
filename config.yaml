@@ -41,6 +41,11 @@ sources:
     root: skills
     harness: agents
 
+  self-improving-agent:
+    type: submodule
+    root: .
+    harness: openclaw
+
   local-skills/agents:
     type: local
     root: .

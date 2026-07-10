@@ -1,4 +1,5 @@
 ---
 harness:
   hermes: ~/.hermes
+  openclaw: ~/.openclaw
   opencode: ~/.config/opencode
