@@ -62,7 +62,7 @@ If uninstall skipped an existing path because it pointed elsewhere, mention that
 
 ## Pitfalls
 
-- Do not mirror Hermes package-bundled skills into `~/.llm-harness/harness/hermes/skills`. That tree is only for custom Hermes-only skills; built-in package skills belong in the Hermes install/source tree (for Oleksii, typically `~/hermes-agent/skills`). Before copying any Hermes skill into `~/.llm-harness`, compare its category/name against the built-in Hermes skill tree.
+- Do not mirror Hermes package-bundled skills into `~/.llm-harness/harness/hermes/skills`. That tree is only for custom Hermes-only skills; built-in package skills belong in the Hermes installed runtime/package tree: `~/.hermes/skills`. Before copying any Hermes skill into `~/.llm-harness`, compare its category/name against the currently installed Hermes skill tree.
 - Do not assume `./harness.py uninstall` removes arbitrary target files; it only removes symlinks that resolve to the expected managed source.
 - Do not delete `~/.claude`, `~/.codex`, or similar homes just because a migration touched them; preserve unrelated user files unless explicitly told otherwise.
 - Do not rely only on README claims; installer behavior can differ in detail from prose.
