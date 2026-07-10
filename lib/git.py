@@ -104,7 +104,6 @@ def update_submodules(
 
     updated_any = False
     for path in requested:
-        print(f"[update-skills] Checking {path}")
         submodule_path = repo_root / path
 
         if has_local_changes(submodule_path):
