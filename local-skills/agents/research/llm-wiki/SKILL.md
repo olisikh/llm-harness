@@ -104,11 +104,47 @@ from the wiki.
 | Remember | `/wiki remember [topic]` — capture a durable note from the current turn |
 | Lint | `/wiki lint` or "lint the wiki" |
 | Status | `/wiki status` or "show wiki status" |
+| Help | `/wiki help` or "what can the wiki do?" |
 
 When the user says `/wiki ...`, treat it as a shorthand for the equivalent
 natural-language request. The skill has no actual slash command — it is invoked
 by the harness skill system when the request matches the description, or by
 the agent noticing a wiki-relevant request.
+
+In Hermes, invoke the skill with the registered name `llm-wiki`, e.g.
+`/llm-wiki help`, `/llm-wiki query ...`, `/llm-wiki ingest ...`.
+
+## Help workflow
+
+When the user asks for help on the wiki (e.g. `/llm-wiki help`, `/wiki help`,
+"what can the wiki do?", or "how do I use the wiki?"), respond with a concise
+reference card:
+
+```markdown
+# LLM Wiki — quick reference
+
+Repo: ~/.llm-wiki  |  Hub: ~/.llm-wiki/hub  |  Default topic: dotfiles
+
+Commands (use `/llm-wiki <cmd>` in Hermes, or `/wiki <cmd>` as alias):
+
+| Command | Purpose |
+|---|---|
+| help | This reference |
+| status | Active topics and stats |
+| init <slug> | Create a new topic wiki |
+| ingest <url/file/text> | Save a source to raw/ |
+| compile | Turn uncompiled sources into wiki articles |
+| query <question> | Answer from the wiki |
+| search <terms> | Search the topic wiki |
+| remember [topic] | Capture a durable note from the current turn |
+| lint | Rebuild indexes, list orphans/broken links |
+
+Ambient behavior: I read wiki indexes before answering domain questions and
+suggest adding durable knowledge when relevant.
+```
+
+Keep the help response under ~600 tokens. Do not perform any other wiki operation
+unless the user explicitly asks for one.
 
 ## Ingestion workflow
 
