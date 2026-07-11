@@ -1,5 +1,5 @@
 ---
-name: llm-wiki
+name: wiki
 description: >
   Universal agent skill for managing and querying an Obsidian-compatible,
   Karpathy-style LLM-compiled wiki stored at ~/.llm-wiki/hub. Supports
@@ -17,7 +17,7 @@ metadata:
     related_skills: [obsidian, llm-wiki]
 ---
 
-# LLM Wiki
+# Wiki
 
 You manage and query an LLM-compiled, Obsidian-compatible knowledge base stored in
 a Git repository at `~/.llm-wiki`.
@@ -111,12 +111,12 @@ natural-language request. The skill has no actual slash command — it is invoke
 by the harness skill system when the request matches the description, or by
 the agent noticing a wiki-relevant request.
 
-In Hermes, invoke the skill with the registered name `llm-wiki`, e.g.
-`/llm-wiki help`, `/llm-wiki query ...`, `/llm-wiki ingest ...`.
+In Hermes, invoke the skill with the registered name `wiki`, e.g.
+`/wiki help`, `/wiki query ...`, `/wiki ingest ...`.
 
 ## Help workflow
 
-When the user asks for help on the wiki (e.g. `/llm-wiki help`, `/wiki help`,
+When the user asks for help on the wiki (e.g. `/wiki help`, `/wiki help`,
 "what can the wiki do?", or "how do I use the wiki?"), respond with a concise
 reference card:
 
@@ -125,7 +125,7 @@ reference card:
 
 Repo: ~/.llm-wiki  |  Hub: ~/.llm-wiki/hub  |  Default topic: dotfiles
 
-Commands (use `/llm-wiki <cmd>` in Hermes, or `/wiki <cmd>` as alias):
+Commands (use `/wiki <cmd>` in Hermes, or `/wiki <cmd>` as alias):
 
 | Command | Purpose |
 |---|---|
