@@ -1,12 +1,12 @@
 ---
 name: llm-wiki
 description: >
-  Hermes skill for managing and querying an Obsidian-compatible, Karpathy-style
-  LLM-compiled wiki stored at ~/.llm-wiki/hub. Supports ingestion, compilation,
-  query, lint, and ambient recall from topic sub-wikis. Activates on any wiki,
-  knowledge-base, ingest, compile, query, lint, or long-term memory request, or
-  when the current conversation looks like it should read from or write to the
-  configured wiki.
+  Universal agent skill for managing and querying an Obsidian-compatible,
+  Karpathy-style LLM-compiled wiki stored at ~/.llm-wiki/hub. Supports
+  ingestion, compilation, query, lint, and ambient recall from topic
+  sub-wikis. Activates on any wiki, knowledge-base, ingest, compile, query,
+  lint, or long-term memory request, or when the current conversation looks
+  like it should read from or write to the configured wiki.
 version: 1.0.0
 author: Hermes Agent
 license: MIT
@@ -17,14 +17,14 @@ metadata:
     related_skills: [obsidian, llm-wiki]
 ---
 
-# LLM Wiki (Hermes)
+# LLM Wiki
 
 You manage and query an LLM-compiled, Obsidian-compatible knowledge base stored in
 a Git repository at `~/.llm-wiki`.
 
 **Design goal:** this is the long-term memory layer — shared by Hermes, OpenClaw,
-OpenCode, Codex, Claude, and the human. Short-term hot memory stays in
-`~/.hermes/memories/`; durable compiled knowledge lives here.
+OpenCode, Codex, Claude, and the human. Short-term hot memory stays in the
+harness's native memory; durable compiled knowledge lives here.
 
 ## Canonical paths
 
@@ -106,11 +106,13 @@ from the wiki.
 | Status | `/wiki status` or "show wiki status" |
 
 When the user says `/wiki ...`, treat it as a shorthand for the equivalent
-natural-language request.
+natural-language request. The skill has no actual slash command — it is invoked
+by the harness skill system when the request matches the description, or by
+the agent noticing a wiki-relevant request.
 
 ## Ingestion workflow
 
-1. Resolve source: URL → use `web_extract`; file → read; pasted text → save as note.
+1. Resolve source: URL → use `web_extract` or equivalent; file → read; pasted text → save as note.
 2. Write source into `raw/<type>/` with frontmatter including `source_url` and `ingested` date.
 3. Add source to `raw/_index.md`.
 4. Append to `log.md`: `## [YYYY-MM-DD] ingest | <source-title>`.
@@ -129,7 +131,7 @@ natural-language request.
 1. Read topic `_index.md`.
 2. Read relevant branch index (`wiki/_index.md`, `raw/_index.md`, etc.).
 3. Read matched articles.
-4. If indexes are insufficient, run `search_files` inside the topic wiki.
+4. If indexes are insufficient, search the topic wiki for key terms.
 5. Synthesize and cite exact file paths.
 
 ## Lint workflow
