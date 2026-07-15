@@ -24,7 +24,7 @@ Read this file before non-trivial routing decisions:
 
 It declaratively defines:
 
-- primary, secondary, and tertiary choices for every role;
+- ordered model chains for every role;
 - the runtime projection for Hermes-native parent/delegation/fallback settings;
 - cheap-worker suitability;
 - escalation and switch conditions;
@@ -48,7 +48,7 @@ After an approved policy edit, inspect the projection with `--print`, then run `
 5. Validate independently with tools, tests, source evidence, or file inspection.
 6. Escalate with a compact handoff when the YAML conditions are met.
 
-Do not delegate a task that direct or deterministic tools can perform more cheaply and reliably.
+Never delegate a task that direct or deterministic tools can perform more cheaply and reliably.
 
 ## Route selection
 
@@ -89,7 +89,7 @@ Follow `switching` in `model-routing.yaml`.
 
 - Transport failures use the Hermes runtime fallback chain after the configured API retry cap; do not add unbounded retries.
 - Structured output: validate locally, make only the configured same-model repair attempt, simplify the schema/deterministic work if needed, then escalate.
-- Tool failures: change models only for repeated model-behavior failures. Fix environment, files, credentials, permissions, compilers, or services directly when they are the cause.
+- Tool failures: switch models only when model behavior caused the failure. Otherwise fix the environment, files, credentials, permissions, compilers, or services directly.
 - Poor/uncertain work: issue one focused repair, then climb cheap worker -> specialist -> reviewer as specified by the policy.
 
 Every provider/model switch is cold. The receiving route has no conversation, tool history, or provider prompt cache unless you include it in the handoff.
@@ -100,7 +100,7 @@ Read the policy's `cost_controls` and `privacy_and_verification` sections rather
 
 - Treat every provider listed as hosted as remote; do not send secrets or unnecessary private material.
 - Do not use local Ollama until the policy says it is enabled after separate approval, installation, and benchmark.
-- Keep Sol/reviewer work out of default and cheap-worker paths.
+
 - Run at most the configured number of specialists/reviewers concurrently.
 
 ## Handoff contract
