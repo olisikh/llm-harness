@@ -54,3 +54,4 @@ python ~/.agents/skills/mlops/limits/scripts/limits.py --json
 - Provider errors should be printed as short status lines only when that provider was explicitly requested or no successful limits were found.
 - Skill name is `limits`; in Hermes skill-slash form this is intended to be `/limits`.
 - The canonical source path is `~/.llm-harness/local-skills/agents/mlops/limits`; the installed runtime path is `~/.agents/skills/mlops/limits`.
+- For harness repository maintenance, use `cd ~/.llm-harness && ./harness.py update-repo` for a full refresh or `./harness.py update-skills` for configured submodule sources only; do not link or copy `update-skills.sh` into runtime homes.

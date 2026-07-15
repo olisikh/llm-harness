@@ -44,6 +44,20 @@ Do not use this for one-off temporary personal notes that should remain local-on
 4. After creating, moving, or editing skills, run `cd ~/.llm-harness && ./harness.py install` so harness homes refresh.
 5. Verify symlink targets with realpath-level checks, not just installer stdout.
 
+## Repository Maintenance
+
+Run maintenance from the canonical repository; do not create, copy, or link
+`update-skills.sh` into a harness home or Hermes scripts directory.
+
+```sh
+cd ~/.llm-harness
+./harness.py update-repo        # pull the harness repo, update submodules, refresh links
+./harness.py update-skills      # update configured skill submodules and refresh links only
+```
+
+Use `update-repo` for full repository maintenance and `update-skills` when
+only configured submodule sources need refreshing.
+
 ## Hermes-Specific Layout Rule
 
 Hermes skills may need nested category paths in the installed runtime tree, for example:
@@ -71,8 +85,7 @@ The installer must preserve nested category paths by linking every directory con
 2. **Assuming skill trees are flat.** Hermes may require nested category paths like `autonomous-ai-agents/<skill>`.
 3. **Forgetting to run `./harness.py install` after repo edits.** The repo can be correct while runtime homes are stale.
 4. **Keeping two editable copies.** Runtime paths should be symlinked compatibility/install views, not a second source of truth.
-5. **Updating the sync cron job without refreshing install links.** The automated update path should both sync repo state and reinstall links.
-6. **Fixing only the repo script when Hermes cron still fails.** Hermes `cronjob` script entries are resolved from `~/.hermes/scripts/`; if the durable implementation moved into `~/.llm-harness/scripts/...`, keep a wrapper in `~/.hermes/scripts/` that `exec`s the repo script and manually run the job once after changing it.
+5. **Using a copied or linked maintenance script.** `update-skills.sh` belongs only in `~/.llm-harness`; invoke `./harness.py update-repo` or `./harness.py update-skills` from that repository instead.
 
 ## Verification Checklist
 

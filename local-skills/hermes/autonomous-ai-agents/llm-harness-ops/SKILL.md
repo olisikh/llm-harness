@@ -10,6 +10,20 @@ Use this skill when the user wants to install, migrate, reinstall, or verify a r
 
 This skill is for *home-layout operations*, not source-code changes inside the harness repo.
 
+## Repository Maintenance
+
+Run maintenance from `~/.llm-harness`; do not create, copy, or link an
+`update-skills.sh` helper into another harness home.
+
+```sh
+cd ~/.llm-harness
+./harness.py update-repo        # full repository maintenance
+./harness.py update-skills      # refresh configured skill submodules only
+```
+
+Use `update-repo` when the checkout itself should be pulled and maintained;
+use `update-skills` when only configured submodule sources need updating.
+
 ## When to use
 
 - Installing or reinstalling the harness-first `llm-harness` checkout

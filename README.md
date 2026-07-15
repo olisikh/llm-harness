@@ -87,7 +87,7 @@ Optional commit/push flow:
 Sync rules:
 
 - `config.yaml` defines all skill sources under `sources:` with `type: submodule` or `type: local`
-- `harness.py update-skills` updates pinned submodule commits only for sources with `type: submodule`; it never creates symlinks inside the repo
+- `harness.py update-skills` updates pinned submodule commits only for sources with `type: submodule`, then refreshes managed skill symlinks in target harness homes and removes stale managed links
 - install-time mapping of skills to target harness homes is controlled by `config.yaml`
 - later sources in `config.yaml` win on target-path collision
 

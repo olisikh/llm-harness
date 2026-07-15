@@ -72,7 +72,7 @@ A source is a top-level key under `sources:` in `config.yaml`. It points at a di
 
 ### Type
 
-- `type: submodule` — `./harness.py update-skills` will fetch and update the pinned commit. `./harness.py install` symlinks skills from `repo/<source-name>/<root>`.
+- `type: submodule` — `./harness.py update-skills` will fetch and update the pinned commit, then refresh managed skill symlinks. `./harness.py install` can also refresh skills from `repo/<source-name>/<root>`.
 - `type: local` — `./harness.py update-skills` ignores it. `./harness.py install` symlinks skills from `repo/<source-name>/<root>`.
 
 ### Root
@@ -258,8 +258,7 @@ Use this when skills live in an external repository you want to track.
 2. Add a `sources:` entry in `config.yaml` with `type: submodule`.
 3. Set `root` and default `harness`.
 4. Add overrides for any skills that belong to a different harness.
-5. Run `./harness.py update-skills <source-name>` to initialize and pin the submodule.
-6. Run `./harness.py install` to create target symlinks.
+5. Run `./harness.py update-skills <source-name>` to initialize and pin the submodule, refresh target symlinks, and remove stale managed links.
 
 Example: add a new submodule `acme-skills`.
 
@@ -282,7 +281,6 @@ Run:
 
 ```bash
 ./harness.py update-skills acme-skills
-./harness.py install
 ```
 
 If the submodule groups some skills under an extra directory level (for example `document-skills/docx`), use the flattening pattern described in [Flattening a nested skill group](#flattening-a-nested-skill-group) above.
@@ -390,7 +388,7 @@ Removes all symlinks managed by `~/.llm-harness`. For skill directories it remov
 
 ### `harness.py update-skills`
 
-Updates pinned commits for every source with `type: submodule` in `config.yaml`. Skips sources with `type: local`. Skips submodules that have uncommitted local changes.
+Updates pinned commits for every source with `type: submodule` in `config.yaml`. Skips sources with `type: local` and submodules with uncommitted local changes. It then refreshes all managed harness links and removes stale managed skill symlinks; unrelated files and symlinks outside `~/.llm-harness` are preserved.
 
 ```bash
 ./harness.py update-skills              # update all configured submodules
@@ -400,7 +398,7 @@ Updates pinned commits for every source with `type: submodule` in `config.yaml`.
 
 ### `harness.py update-repo`
 
-Pulls the latest `llm-harness` repo, runs `update-skills --commit --push`, then runs `install`. Intended for cron or periodic automation.
+Pulls the latest `llm-harness` repo, then runs `update-skills --commit --push` (which also refreshes managed harness links). Intended for cron or periodic automation.
 
 ```bash
 ./harness.py update-repo

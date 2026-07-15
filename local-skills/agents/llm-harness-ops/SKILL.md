@@ -22,10 +22,21 @@ Always prefer the canonical operational guide:
 
 - `llm-harness` symlinks skills directly from configured sources into `~/.<harness>/skills/`.
 - Skill sources are declared in `config.yaml` under `sources:`.
-- A source has `type: submodule` (git submodule, updated by `./harness.py update-skills`) or `type: local` (directory in `~/.llm-harness`, ignored by `./harness.py update-skills`).
+- A source has `type: submodule` (git submodule, updated by `./harness.py update-skills`) or `type: local` (directory in `~/.llm-harness`, ignored by `./harness.py update-skills`). After updating submodules, that command refreshes managed harness links and removes stale managed symlinks.
 - Default harness mappings live in `harness-paths.yaml` or built-in defaults.
 - Nested category paths inside a source are preserved when symlinking.
 - Later sources in `config.yaml` win on target-path collision.
+
+## Repository maintenance
+
+Run maintenance from the canonical checkout; do not link or copy
+`update-skills.sh` into another harness home.
+
+```sh
+cd ~/.llm-harness
+./harness.py update-repo        # pull the repository, update sources, refresh links
+./harness.py update-skills      # update configured skill submodules only
+```
 
 ## Workflows
 

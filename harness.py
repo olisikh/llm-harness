@@ -68,6 +68,11 @@ def cmd_update_skills(args: argparse.Namespace) -> int:
         commit=args.commit,
         push=args.push,
     )
+
+    print("== refresh harness links ==")
+    cfg = Config(repo_root())
+    for name in cfg.list_harness_names():
+        sync_harness(cfg, name)
     return 0
 
 
@@ -84,10 +89,9 @@ def cmd_update_repo(args: argparse.Namespace) -> int:
     print("== pull ==")
     run("git", "pull", "--rebase", "--autostash", "origin", "main", cwd=root, check=True)
 
-    print("== update shared skill submodules ==")
+    print("== update shared skill submodules and refresh harness links ==")
     update_submodules(root, requested=[], commit=True, push=True)
 
-    print("== install harness links ==")
     cfg = Config(root)
     for name in cfg.list_harness_names():
         sync_harness(cfg, name)
@@ -106,8 +110,8 @@ LLM harness homes (e.g. ~/.agents, ~/.claude, ~/.codex, ~/.hermes, ~/.config/ope
 Subcommands:
   install         Symlink configured skills and harness files into target homes.
   uninstall       Remove all symlinks managed by this repo from target homes.
-  update-skills   Update pinned commits for configured git submodule skill sources.
-  update-repo     Pull latest repo, update submodules (--commit --push), then install.
+  update-skills   Update configured git submodules, then refresh managed skill links.
+  update-repo     Pull latest repo, then update submodules and refresh links.
 
 Examples:
   ./harness.py install
@@ -141,7 +145,7 @@ def main() -> int:
 
     update_parser = subparsers.add_parser(
         "update-skills",
-        help="update pinned commits for configured submodule skill sources",
+        help="update configured submodules, then refresh managed skill links",
     )
     update_parser.add_argument(
         "--commit",
