@@ -6,7 +6,7 @@ author: Hermes Agent
 license: MIT
 metadata:
   hermes:
-    tags: [model-routing, delegation, orchestration, cost-control, opencode, ollama]
+    tags: [model-routing, delegation, orchestration, cost-control, opencode]
     related_skills: [hermes-agent-devops, harness-managed-skills]
 ---
 
@@ -28,7 +28,7 @@ It declaratively defines:
 - the runtime projection for Hermes-native parent/delegation/fallback settings;
 - cheap-worker suitability;
 - escalation and switch conditions;
-- cost caps, privacy, local-model policy, and handoff requirements.
+- cost caps, privacy, and handoff requirements.
 
 Do **not** hard-code or silently substitute role models from this skill. Use the YAML policy. Recheck its runtime projection against `~/.hermes/config.yaml` with:
 
@@ -94,13 +94,11 @@ Follow `switching` in `model-routing.yaml`.
 
 Every provider/model switch is cold. The receiving route has no conversation, tool history, or provider prompt cache unless you include it in the handoff.
 
-## Cost, privacy, and local models
+## Cost and privacy
 
 Read the policy's `cost_controls` and `privacy_and_verification` sections rather than relying on memory.
 
 - Treat every provider listed as hosted as remote; do not send secrets or unnecessary private material.
-- Do not use local Ollama until the policy says it is enabled after separate approval, installation, and benchmark.
-
 - Run at most the configured number of specialists/reviewers concurrently.
 
 ## Handoff contract
