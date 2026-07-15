@@ -1,0 +1,43 @@
+# Shared TTS language routing for the Hermes and OpenClaw command providers.
+#
+# This file intentionally stays separate from application-native configs.
+# Set TTS_ROUTING_CONFIG to use another file (HERMES_TTS_ROUTING_CONFIG remains
+# accepted for backwards compatibility).
+#
+# Each language chooses one provider. An empty edge.voice selects a
+# locale-matched feminine voice from Edge's live catalog. Routes fail directly
+# when their selected provider cannot produce audio.
+
+default:
+  provider: edge
+  edge:
+    voice: '' # Automatic feminine Edge voice for any unmapped language.
+
+languages:
+  en:
+    provider: edge
+    edge:
+      voice: en-US-JennyNeural
+    voicebox:
+      profile: Hermes Bella
+      engine: kokoro
+      preset_voice_id: af_bella
+      language: en
+      http_timeout_seconds: 3
+      poll_timeout_seconds: 15
+    # If changing this route to provider: edge, suitable female options include
+    # en-US-JennyNeural, en-US-EmmaNeural, en-US-AriaNeural,
+    # en-US-MichelleNeural, en-GB-LibbyNeural, en-GB-SoniaNeural.
+    # Installed but intentionally not selected: Hermes Aiden (slow Qwen CustomVoice).
+
+  uk:
+    provider: edge
+    edge:
+      voice: uk-UA-PolinaNeural
+    # Current female Edge option: uk-UA-PolinaNeural.
+
+  nl:
+    provider: edge
+    edge:
+      voice: nl-NL-ColetteNeural
+    # Other female Edge option: nl-NL-FennaNeural.

@@ -25,6 +25,12 @@ PREFERRED_LOCALES: dict[str, list[str]] = {
     "sw": ["sw-KE", "sw-TZ"],
 }
 
+# Pick a mature, neutral US English narration voice instead of whichever
+# alphabetically-first voice the live catalog happens to return.
+PREFERRED_VOICES: dict[str, str] = {
+    "en": "en-US-AriaNeural",
+}
+
 LANGUAGE_ALIASES = {
     "nb": "no",
     "nn": "no",
@@ -137,6 +143,14 @@ def choose_voice(
             if voice.get("ShortName") == forced_voice:
                 return str(voice["Locale"]), voice
         raise RuntimeError(f"Requested voice not found: {forced_voice}")
+
+    # An explicit locale remains stronger than a language-level preference.
+    if not forced_locale:
+        preferred_voice = PREFERRED_VOICES.get(detected_language)
+        if preferred_voice:
+            for voice in voices:
+                if voice.get("ShortName") == preferred_voice:
+                    return str(voice["Locale"]), voice
 
     if forced_locale:
         locale = forced_locale
