@@ -19,6 +19,7 @@ Preferred shared transport fallback order:
 3. `ollama-cloud/kimi-k2.7-code`
 4. `opencode-zen/mimo-v2.5-free`
 5. `opencode-zen/deepseek-v4-flash-free`
+6. `opencode-zen/qwen3.6-plus-free`
 
 The chain is global, so it is a resilience mechanism rather than a complete semantic role router. The parent applies role-specific semantic escalation.
 
