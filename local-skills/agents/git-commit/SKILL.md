@@ -25,7 +25,7 @@ allowed-tools: Bash(git add *) Bash(git commit *) Bash(git diff *) Bash(git stat
    - Has a concise subject line (≤72 chars) in imperative mood
    - Focuses on WHY, not what (the diff shows what)
    - Matches the tone and style of recent commits
-   - Ends with: `Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>`
+   - Does not add `Co-Authored-By`, model/vendor attribution, or other AI attribution trailers unless the user explicitly requests them
 4. Create the commit using a HEREDOC to preserve formatting.
 5. If the user also asked to **push/sync**, do not assume the earlier status check is still current. Run `git fetch origin`, inspect ahead/behind, and if the push is rejected because `origin/<branch>` moved, rebase onto the updated remote branch before retrying the push. Treat this as a normal race, not as a terminal failure.
 6. Report the commit hash and subject on success.
