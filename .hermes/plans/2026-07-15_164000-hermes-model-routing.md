@@ -4,7 +4,7 @@
 
 **Goal:** Implement cost-conscious model routing using existing Hermes configuration, `delegate_task`, a compact parent instruction, a harness-managed skill, explicit OpenCode specialists, and isolated Sol escalation.
 
-**Architecture:** Terra remains the judgment-bearing main agent. Luna is globally pinned for native bounded children. Per-task specialist selection uses the existing OpenCode CLI, while deterministic work uses direct tools or `execute_code`. The detailed policy lives in a portable skill; `SOUL.md` contains only the trigger to load it. No Hermes core patch or hook is required.
+**Architecture:** Terra remains the judgment-bearing main agent. Luna is globally pinned for native bounded children. Per-task specialist selection uses the existing OpenCode CLI, while deterministic work uses direct tools or `execute_code`. The declarative semantic source of truth is `~/.hermes/model-routing.yaml`; a Hermes-only harness-managed skill supplies procedure and reads that YAML. `SOUL.md` contains only the trigger to load it. No Hermes core patch or hook is required.
 
 **Repositories:** `~/.llm-harness`, `~/.hermes`, `~/.llm-wiki`
 
@@ -23,11 +23,11 @@
 - [ ] Commit and push this plan documentation, then verify all repositories are clean.
 - [ ] Obtain Oleksii's explicit approval before implementing the feature.
 
-## Task 1: Create the portable routing skill
+## Task 1: Create the Hermes-only routing skill
 
 **Files:**
 
-- Create: `~/.llm-harness/local-skills/agents/model-routing/SKILL.md`
+- Create: `~/.llm-harness/local-skills/hermes/model-routing/SKILL.md`
 
 **Required content:**
 
@@ -82,8 +82,10 @@
 
 ## Task 4: Apply routing configuration
 
-**File:**
+**Files:**
 
+- Create: `~/.hermes/model-routing.yaml`
+- Create: `~/.hermes/scripts/sync-model-routing-config.py`
 - Modify: `~/.hermes/config.yaml`
 
 **Target values:**
@@ -107,7 +109,7 @@ delegation.max_iterations: 15
 3. `ollama-cloud/kimi-k2.7-code`
 4. low-cost OpenCode Zen hosted fallback(s)
 
-Do not add a local Ollama entry while no local model is installed.
+Do not add a local Ollama entry while no local model is installed. `model-routing.yaml` is the editable semantic source of truth; the sync script projects only its runtime-owned values into `config.yaml` and supports `--check`, `--print`, and `--apply`.
 
 **Validation:**
 
@@ -138,13 +140,13 @@ Do not deliberately exhaust quotas or simulate a destructive provider outage. Va
 5. Append the Hermes topic log.
 6. Commit and push `~/.llm-wiki`.
 7. Verify all three repositories are clean and `HEAD == origin/main`.
-8. Restart the Hermes gateway after static validation.
-9. Verify gateway health and automatic TTS configuration without poisoning active-chat dedup state.
+8. Do not restart an active gateway from a gateway-owned session. Validate through isolated CLI runs; any LaunchAgent repair/restart is a separate maintenance operation.
+9. Preserve TTS configuration as a static invariant unless a separate end-to-end test is explicitly approved.
 
 ## Rollback
 
 1. Revert only the Hermes-state routing commit.
-2. Restart the gateway and verify previous model/delegation/TTS settings.
+2. Validate the restored configuration statically; restart only through a separately approved, externally initiated maintenance operation.
 3. If needed, revert the llm-harness skill commit and rerun `./harness.py install`.
 4. Append the rollback result to llm-wiki; never delete the history.
 
