@@ -41,7 +41,15 @@ Do not use this for one-off temporary personal notes that should remain local-on
    - OpenCode-only skills: `local-skills/opencode/` (when needed)
    - use `harness/<name>/` only for non-skill harness-specific files such as `CLAUDE.md`
 3. Prefer editing repo source, not installed runtime copies.
-4. After creating, moving, or editing skills, run `cd ~/.llm-harness && ./harness.py install` so harness homes refresh.
+4. After creating, moving, or editing skills, run the installer so harness homes refresh:
+   ```sh
+   cd ~/.llm-harness
+   ./harness.py install
+   ```
+   If the invoking shell's `python3` lacks PyYAML, use the installed Hermes venv explicitly:
+   ```sh
+   ~/.hermes/hermes-agent/venv/bin/python ./harness.py install
+   ```
 5. Verify symlink targets with realpath-level checks, not just installer stdout.
 
 ## Repository Maintenance
