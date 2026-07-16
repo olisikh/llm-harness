@@ -240,6 +240,12 @@
       "source": "awesome-llm-skills/image-enhancer",
       "status": "complete"
     },
+    "agents:in-progress/batch-grill-me": {
+      "harness": "agents",
+      "path": "in-progress/batch-grill-me",
+      "source": "mattpocock-skills/skills/in-progress/batch-grill-me",
+      "status": "complete"
+    },
     "agents:in-progress/claude-handoff": {
       "harness": "agents",
       "path": "in-progress/claude-handoff",
