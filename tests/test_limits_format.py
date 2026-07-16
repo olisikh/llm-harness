@@ -4,6 +4,8 @@ import importlib.util
 import sys
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
+from unittest.mock import patch
 
 SCRIPT = (
     Path(__file__).resolve().parents[1]
@@ -21,7 +23,7 @@ spec.loader.exec_module(limits)
 
 
 class LimitsFormatTests(unittest.TestCase):
-    def test_ollama_uses_fixed_label_and_whole_remaining_percentages(self):
+    def test_provider_id_is_unformatted_and_remaining_is_rounded(self):
         item = {
             "provider": "ollama",
             "usage": {
@@ -30,7 +32,19 @@ class LimitsFormatTests(unittest.TestCase):
             },
         }
 
-        self.assertEqual(limits.format_line(item), "Ollama Cloud: 100%/5h 98%/7d")
+        self.assertEqual(limits.format_line(item), "ollama: 100%/5h 98%/7d")
+
+    def test_fetches_all_provider_usage_in_one_json_call(self):
+        with patch.object(
+            limits.subprocess,
+            "run",
+            return_value=SimpleNamespace(stdout='[{"provider":"codex"}]'),
+        ) as run:
+            self.assertEqual(limits.run_usage(15), [{"provider": "codex"}])
+
+        run.assert_called_once()
+        self.assertEqual(run.call_args.args[0], ["codexbar", "usage", "--json"])
+        self.assertNotIn("CODEX_HOME", run.call_args.kwargs["env"])
 
 
 if __name__ == "__main__":

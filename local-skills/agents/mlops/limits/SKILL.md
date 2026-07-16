@@ -23,12 +23,13 @@ Every provider line follows this exact template:
 
 When the delivery channel supports Markdown, enclose the complete limits output in one fenced `text` code block. Otherwise, emit the provider lines as plain text.
 
-**Provider labels (fixed):**
-| Data provider | Label |
-|---|---|
-| `codex` (OpenAI Codex) | `Codex` |
-| `ollama` (Ollama Cloud) | `Ollama Cloud` |
-| `opencodego` (OpenCode Go) | `Opencode GO` |
+The script makes exactly one provider query:
+
+```bash
+env -u CODEX_HOME codexbar usage --json
+```
+
+It formats the returned `provider` values **as-is**. If `--provider` is supplied, it filters that one response locally.
 
 **Rules:**
 - **remaining** = `100.0 - usedPercent`, rounded to whole number (no decimals).
@@ -50,8 +51,7 @@ python ~/.agents/skills/mlops/limits/scripts/limits.py --json
 
 ## Notes
 
-- Strip `CODEX_HOME` before invoking CodexBar so isolated homes do not break Codex CLI usage reads.
-- The `codex` provider should use codexbar `--source cli`; the web source can hang.
+- Strip `CODEX_HOME` before invoking CodexBar so isolated homes do not break usage reads.
 - Provider errors should be printed as short status lines only when that provider was explicitly requested or no successful limits were found.
 - Skill name is `limits`; in Hermes skill-slash form this is intended to be `/limits`.
 - The canonical source path is `~/.llm-harness/local-skills/agents/mlops/limits`; the installed runtime path is `~/.agents/skills/mlops/limits`.

@@ -7,7 +7,6 @@ import os
 import shutil
 import subprocess
 import sys
-from pathlib import Path
 from typing import Any
 
 PROVIDER_MAP = {
@@ -38,57 +37,11 @@ PROVIDER_MAP = {
     "kilo": "kilo",
 }
 
-LABELS = {
-    "codex": "Codex",
-    "ollama": "Ollama Cloud",
-    "opencodego": "Opencode GO",
-    "gemini": "Gemini",
-    "claude": "Claude",
-    "openrouter": "OpenRouter",
-    "zai": "Z.ai",
-    "minimax": "MiniMax",
-    "kimi": "Kimi",
-    "mistral": "Mistral",
-    "deepseek": "DeepSeek",
-    "alibaba-coding-plan": "Alibaba Coding Plan",
-    "copilot": "Copilot",
-    "kilo": "Kilo",
-}
-
-PREFERRED_SOURCE = {"codex": "cli"}
 
 
 def map_provider(name: str) -> str:
     key = name.strip().lower().replace("_", "-")
     return PROVIDER_MAP.get(key, key)
-
-
-def codexbar_home() -> Path:
-    return Path(os.environ.get("CODEXBAR_HOME", Path.home() / ".codexbar")).expanduser()
-
-
-def providers_from_codexbar_config() -> list[str]:
-    path = codexbar_home() / "config.json"
-    if not path.exists():
-        return []
-    try:
-        payload = json.loads(path.read_text())
-    except Exception:
-        return []
-    items = payload.get("providers")
-    if not isinstance(items, list):
-        return []
-    providers: list[str] = []
-    for item in items:
-        if not isinstance(item, dict) or not item.get("enabled"):
-            continue
-        provider_id = item.get("id")
-        if not isinstance(provider_id, str) or not provider_id.strip():
-            continue
-        mapped = map_provider(provider_id)
-        if mapped not in providers:
-            providers.append(mapped)
-    return providers
 
 
 def extract_json(stdout: str) -> Any:
@@ -101,26 +54,24 @@ def extract_json(stdout: str) -> Any:
     raise ValueError("no JSON found")
 
 
-def run_provider(provider: str, timeout: int) -> dict[str, Any]:
-    cmd = ["codexbar", "usage", "--provider", provider, "--format", "json", "--pretty"]
-    source = PREFERRED_SOURCE.get(provider)
-    if source:
-        cmd[cmd.index("--format"):cmd.index("--format")] = ["--source", source]
+def run_usage(timeout: int) -> list[dict[str, Any]]:
+    """Fetch all configured providers in one CodexBar JSON request."""
+    cmd = ["codexbar", "usage", "--json"]
     env = dict(os.environ)
     env.pop("CODEX_HOME", None)
     try:
         proc = subprocess.run(cmd, text=True, capture_output=True, timeout=timeout, env=env)
     except subprocess.TimeoutExpired:
-        return {"provider": provider, "error": f"timeout after {timeout}s"}
+        return [{"provider": "codexbar", "error": f"timeout after {timeout}s"}]
     try:
         payload = extract_json(proc.stdout)
-        item = payload[0] if isinstance(payload, list) and payload else payload
     except Exception as exc:
-        return {"provider": provider, "error": str(exc)}
-    if not isinstance(item, dict):
-        return {"provider": provider, "error": "empty result"}
-    item.setdefault("provider", provider)
-    return item
+        return [{"provider": "codexbar", "error": str(exc)}]
+    if isinstance(payload, dict):
+        payload = [payload]
+    if not isinstance(payload, list):
+        return [{"provider": "codexbar", "error": "empty result"}]
+    return [item for item in payload if isinstance(item, dict)]
 
 
 def window_label(minutes: Any) -> str:
@@ -149,8 +100,8 @@ def remaining_token(win: dict[str, Any]) -> str | None:
 
 
 def format_line(item: dict[str, Any]) -> str | None:
-    provider = item.get("provider", "unknown")
-    label = LABELS.get(provider, provider)
+    provider = str(item.get("provider", "unknown"))
+    label = provider
     if err := item.get("error"):
         return f"{label}: error ({err})"
     usage = item.get("usage") or {}
@@ -175,19 +126,15 @@ def main() -> int:
         print("codexbar not found", file=sys.stderr)
         return 127
 
-    providers = []
+    results = run_usage(args.timeout)
     if args.provider:
-        providers = [map_provider(p) for p in args.provider]
-    else:
-        providers = providers_from_codexbar_config()
+        requested = {map_provider(provider) for provider in args.provider}
+        results = [
+            item
+            for item in results
+            if map_provider(str(item.get("provider", ""))) in requested
+        ]
 
-    # Deduplicate while preserving order.
-    providers = list(dict.fromkeys(providers))
-    if not providers:
-        print("No enabled CodexBar providers found")
-        return 2
-
-    results = [run_provider(p, args.timeout) for p in providers]
     if args.json:
         print(json.dumps(results, indent=2, sort_keys=True))
         return 0
