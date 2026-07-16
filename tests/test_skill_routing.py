@@ -1,0 +1,106 @@
+"""Tests for gating new skills until their configured routing is approved."""
+
+import json
+import sys
+import tempfile
+import unittest
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from lib.config import Config
+from lib.routing import approve_skill, discover_unapproved_skills, seed_routing_index
+
+
+class SkillRoutingTests(unittest.TestCase):
+    def setUp(self):
+        self.tempdir = tempfile.TemporaryDirectory()
+        self.root = Path(self.tempdir.name)
+        self.source = self.root / "local-skills" / "agents" / "category" / "example"
+        self.source.mkdir(parents=True)
+        (self.source / "SKILL.md").write_text("---\nname: example\n---\n")
+        for harness in ("agents", "claude", "hermes"):
+            (self.root / "home" / f".{harness}").mkdir(parents=True)
+        (self.root / "harness-paths.yaml").write_text(
+            "harness:\n"
+            f"  agents: {self.root / 'home' / '.agents'}\n"
+            f"  claude: {self.root / 'home' / '.claude'}\n"
+            f"  hermes: {self.root / 'home' / '.hermes'}\n"
+        )
+        self.write_config("")
+        self.config = Config(self.root)
+        self.source_id = "local-skills/agents/category/example"
+
+    def tearDown(self):
+        self.tempdir.cleanup()
+
+    def write_config(self, extra: str):
+        (self.root / "config.yaml").write_text(
+            """sources:
+  local-skills/agents:
+    type: local
+    root: .
+    harness: agents
+""" + extra
+        )
+
+    def test_unapproved_skill_is_withheld_until_its_configured_route_is_approved(self):
+        (self.root / "state").mkdir()
+        (self.root / "state" / "skill-routing-index.json").write_text(
+            '{"version": 1, "skills": {}}\n'
+        )
+
+        candidates = discover_unapproved_skills(self.config)
+
+        self.assertEqual([candidate.source for candidate in candidates], [self.source_id])
+        self.assertEqual(candidates[0].harness, "agents")
+        self.assertEqual(list(self.config.list_configured_skills()), [])
+
+        approve_skill(self.config, self.source_id, "agents", reason="general-use workflow")
+
+        self.assertEqual(
+            [(harness, relative_path) for harness, relative_path, _ in self.config.list_configured_skills()],
+            [("agents", "category/example")],
+        )
+        index = json.loads((self.root / "state" / "skill-routing-index.json").read_text())
+        self.assertEqual(index["skills"][self.source_id], {
+            "harness": "agents",
+            "path": "category/example",
+            "reason": "general-use workflow",
+        })
+
+    def test_source_specific_config_route_is_the_route_that_must_be_approved(self):
+        self.write_config(
+            """routes:
+  local-skills/agents/category/example: claude
+"""
+        )
+        (self.root / "state").mkdir()
+        (self.root / "state" / "skill-routing-index.json").write_text(
+            '{"version": 1, "skills": {}}\n'
+        )
+
+        candidate = discover_unapproved_skills(self.config)[0]
+
+        self.assertEqual(candidate.harness, "claude")
+        with self.assertRaises(SystemExit):
+            approve_skill(self.config, self.source_id, "agents")
+        approve_skill(self.config, self.source_id, "claude")
+        self.assertEqual(
+            [(harness, relative_path) for harness, relative_path, _ in self.config.list_configured_skills()],
+            [("claude", "category/example")],
+        )
+
+    def test_seed_indexes_existing_effective_routes(self):
+        seeded = seed_routing_index(self.config)
+
+        self.assertEqual(seeded, 1)
+        self.assertEqual(len(discover_unapproved_skills(self.config)), 0)
+        self.assertEqual(
+            [(harness, relative_path) for harness, relative_path, _ in self.config.list_configured_skills()],
+            [("agents", "category/example")],
+        )
+
+
+if __name__ == "__main__":
+    unittest.main()

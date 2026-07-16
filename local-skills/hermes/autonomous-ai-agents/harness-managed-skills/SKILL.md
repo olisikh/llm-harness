@@ -41,7 +41,8 @@ Do not use this for one-off temporary personal notes that should remain local-on
    - OpenCode-only skills: `local-skills/opencode/` (when needed)
    - use `harness/<name>/` only for non-skill harness-specific files such as `CLAUDE.md`
 3. Prefer editing repo source, not installed runtime copies.
-4. After creating, moving, or editing skills, run the installer so harness homes refresh:
+4. Once the routing index exists, a newly discovered skill is intentionally withheld until its actual `SKILL.md` has been classified and its config-selected harness is approved with `./harness.py approve-skill`.
+5. After creating, moving, or editing skills, run the installer so harness homes refresh:
    ```sh
    cd ~/.llm-harness
    ./harness.py install

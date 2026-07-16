@@ -89,6 +89,8 @@ Sync rules:
 - `config.yaml` defines all skill sources under `sources:` with `type: submodule` or `type: local`
 - `harness.py update-skills` updates pinned submodule commits only for sources with `type: submodule`, then refreshes managed skill symlinks in target harness homes and removes stale managed links
 - `harness.py audit-skills` repairs safe wrong managed symlinks, verifies every effective configured skill resolves to its canonical source, and records the complete/blocked inventory in `state/skill-installation.json`
+- `state/skill-routing-index.json` is the approval gate for discovered source skills: after the initial baseline, a new `SKILL.md` is withheld from every runtime harness until the routing cron has read it and approved the config-selected harness
+- `config.yaml` remains the routing source of truth: source defaults route general skills, existing `overrides:` handle relative-path exceptions, and source-specific `routes:` entries record new Claude/Hermes/etc. exceptions
 - `harness.py update-repo` runs the audit after its pull/update cycle and commits/pushes state changes, so newly discovered skills and corrected installs become durable repository state
 - install-time mapping of skills to target harness homes is controlled by `config.yaml`
 - later sources in `config.yaml` win on target-path collision

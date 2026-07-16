@@ -82,6 +82,7 @@ Current conventions:
 
 - `harness.py install` auto-discovers harness directories.
 - `harness.py audit-skills` is the stateful verification step: it safely repairs repo-managed wrong links, records complete/blocked configured skills in `state/skill-installation.json`, and leaves non-repo paths untouched.
+- `state/skill-routing-index.json` gates installation: once seeded, only reviewed entries matching their `config.yaml` route may install. New discovered skills remain withheld until explicitly classified and approved.
 - Skill sources are read from `config.yaml` and linked with per-skill symlinks, preserving nested category paths.
 - Non-skill top-level harness entries from `harness/<name>/` install as 1:1 symlinks into harness home.
 - Existing non-matching target paths are warnings, not overwrite candidates.

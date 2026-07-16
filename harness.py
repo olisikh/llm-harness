@@ -9,6 +9,12 @@ from pathlib import Path
 from lib.audit import audit_skill_installations, print_audit_summary
 from lib.config import Config
 from lib.git import update_submodules
+from lib.routing import (
+    approve_skill,
+    discover_unapproved_skills,
+    print_candidates,
+    seed_routing_index,
+)
 from lib.sync import sync_harness, uninstall_harness
 
 
@@ -83,6 +89,23 @@ def cmd_audit_skills(args: argparse.Namespace) -> int:
     return 1 if result.invalid_keys else 0
 
 
+def cmd_routing_candidates(args: argparse.Namespace) -> int:
+    print_candidates(discover_unapproved_skills(Config(repo_root())), as_json=args.json)
+    return 0
+
+
+def cmd_seed_routing_index(args: argparse.Namespace) -> int:
+    count = seed_routing_index(Config(repo_root()))
+    print(f"[routing] seeded={count}")
+    return 0
+
+
+def cmd_approve_skill(args: argparse.Namespace) -> int:
+    approve_skill(Config(repo_root()), args.source, args.harness, reason=args.reason)
+    print(f"[routing] approved {args.source} -> {args.harness}")
+    return 0
+
+
 def commit_audit_state(root: Path, state_changed: bool) -> None:
     if not state_changed:
         return
@@ -129,11 +152,16 @@ Subcommands:
   install         Symlink configured skills and harness files into target homes.
   uninstall       Remove all symlinks managed by this repo from target homes.
   update-skills   Update configured submodule sources and refresh links.
-  audit-skills    Repair safe managed skill links and persist verification state.
-  update-repo     Pull latest repo, update submodules, audit skills, and install.
+  audit-skills         Repair safe managed skill links and persist verification state.
+  routing-candidates   List discovered skills withheld pending routing approval.
+  seed-routing-index   Baseline current config-derived routes as approved.
+  approve-skill        Approve a discovered skill for its config-selected harness.
+  update-repo          Pull latest repo, update submodules, audit skills, and install.
 
 Examples:
   ./harness.py install
+  ./harness.py routing-candidates --json
+  ./harness.py approve-skill --source path/to/skill --harness agents
   ./harness.py audit-skills
   ./harness.py uninstall
   ./harness.py update-skills
@@ -189,6 +217,28 @@ def main() -> int:
         help="repair safe managed skill links and persist verification state",
     )
     audit_parser.set_defaults(func=cmd_audit_skills)
+
+    candidates_parser = subparsers.add_parser(
+        "routing-candidates",
+        help="list discovered skills withheld pending routing approval",
+    )
+    candidates_parser.add_argument("--json", action="store_true", help="emit JSON")
+    candidates_parser.set_defaults(func=cmd_routing_candidates)
+
+    seed_parser = subparsers.add_parser(
+        "seed-routing-index",
+        help="baseline current config-derived routes as approved",
+    )
+    seed_parser.set_defaults(func=cmd_seed_routing_index)
+
+    approve_parser = subparsers.add_parser(
+        "approve-skill",
+        help="approve a discovered skill for its config-selected harness",
+    )
+    approve_parser.add_argument("--source", required=True, help="repo-relative skill directory")
+    approve_parser.add_argument("--harness", required=True, help="configured target harness")
+    approve_parser.add_argument("--reason", default="", help="concise routing rationale")
+    approve_parser.set_defaults(func=cmd_approve_skill)
 
     repo_parser = subparsers.add_parser(
         "update-repo",

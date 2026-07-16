@@ -396,6 +396,27 @@ Updates pinned commits for every source with `type: submodule` in `config.yaml`.
 ./harness.py update-skills --commit --push
 ```
 
+### Routing newly discovered skills
+
+`config.yaml` is the routing authority. Each source has a default `harness` for general-use skills; existing `overrides:` remain available for relative-path exceptions; use top-level `routes:` for a source-specific exception when the same source can expose skills through multiple roots.
+
+The tracked `state/skill-routing-index.json` is an approval gate, not a second routing authority. It records the source path, config-selected harness, and target path for every reviewed skill. Once the baseline exists, `harness.py install`, `update-skills`, and `update-repo` install only skills whose index entry exactly matches the current `config.yaml` route. A new upstream `SKILL.md` is discovered but withheld from all harness homes until reviewed.
+
+```bash
+./harness.py routing-candidates --json
+# Read each candidate's SKILL.md and, if needed, add a source-specific route to config.yaml.
+./harness.py approve-skill --source source/path/to/skill --harness hermes
+./harness.py audit-skills
+```
+
+Use `seed-routing-index` only to establish a deliberate baseline for a repository that predates the gate:
+
+```bash
+./harness.py seed-routing-index
+```
+
+The daily Hermes routing cron runs the source update first, reads each withheld candidate, classifies it, updates `config.yaml` for non-default routing, approves it, and then audits the resulting installation. It must keep package-bundled Hermes skills outside this index and never infer a route merely from a name: classify from the skill's actual instructions and dependencies.
+
 ### `harness.py audit-skills`
 
 Repairs an incorrect skill symlink only when its current target is already inside `~/.llm-harness`; external symlinks and real paths remain protected and are reported as blocked. It then verifies every **effective** configured target (after source-order collision handling) resolves to the canonical source and writes the portable inventory at `state/skill-installation.json`.

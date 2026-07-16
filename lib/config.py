@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Configuration loading and harness/skill discovery."""
 
+import json
 import os
 from pathlib import Path
 from typing import Iterator
@@ -26,6 +27,15 @@ class Config:
         if not path.exists():
             return {}
         return yaml.safe_load(path.read_text()) or {}
+
+    def routing_index(self) -> dict | None:
+        path = self.repo_root / "state" / "skill-routing-index.json"
+        if not path.exists():
+            return None
+        data = json.loads(path.read_text())
+        if data.get("version") != 1 or not isinstance(data.get("skills"), dict):
+            raise SystemExit(f"Invalid skill routing index: {path}")
+        return data
 
     def harness_roots(self) -> dict[str, str]:
         roots = dict(DEFAULT_HARNESS_ROOTS)
@@ -75,9 +85,10 @@ class Config:
                 child_sources = []
         return child_sources
 
-    def list_configured_skills(self) -> Iterator[tuple[str, str, Path]]:
-        """Yield (harness_name, rel_path, source_abs) for every configured skill."""
+    def list_discovered_skills(self) -> Iterator[tuple[str, str, str, Path]]:
+        """Yield every raw configured source as (source_id, harness, target_rel, source_abs)."""
         data = self._load_yaml(self.sources_file)
+        routes = data.get("routes") or {}
         for source_name, entry in (data.get("sources") or {}).items():
             source_base = self.repo_root / source_name
             if not source_base.exists():
@@ -113,9 +124,28 @@ class Config:
                         if _is_excluded(rel):
                             dirs.clear()
                             continue
-                        harness = overrides.get(rel, default_harness)
-                        yield (harness, rel, Path(current_root))
+                        source_abs = Path(current_root)
+                        source_id = source_abs.relative_to(self.repo_root).as_posix()
+                        harness = routes.get(
+                            source_id, overrides.get(rel, default_harness)
+                        )
+                        yield (source_id, harness, rel, source_abs)
                         dirs.clear()
+
+    def list_configured_skills(self) -> Iterator[tuple[str, str, Path]]:
+        """Yield approved (harness_name, target_rel, source_abs) mappings."""
+        index = self.routing_index()
+        approved = None if index is None else index["skills"]
+        for source_id, harness, rel, source in self.list_discovered_skills():
+            if approved is not None:
+                record = approved.get(source_id)
+                if (
+                    not isinstance(record, dict)
+                    or record.get("harness") != harness
+                    or record.get("path") != rel
+                ):
+                    continue
+            yield (harness, rel, source)
 
     def configured_submodule_names(self) -> list[str]:
         data = self._load_yaml(self.sources_file)
