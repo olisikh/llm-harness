@@ -27,6 +27,7 @@ When the delivery channel supports Markdown, enclose the complete limits output 
 | Data provider | Label |
 |---|---|
 | `codex` (OpenAI Codex) | `Codex` |
+| `ollama` (Ollama Cloud) | `Ollama Cloud` |
 | `opencodego` (OpenCode Go) | `Opencode GO` |
 
 **Rules:**

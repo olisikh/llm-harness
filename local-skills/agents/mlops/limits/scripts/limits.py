@@ -40,6 +40,7 @@ PROVIDER_MAP = {
 
 LABELS = {
     "codex": "Codex",
+    "ollama": "Ollama Cloud",
     "opencodego": "Opencode GO",
     "gemini": "Gemini",
     "claude": "Claude",
@@ -144,8 +145,7 @@ def remaining_token(win: dict[str, Any]) -> str | None:
     except Exception:
         return None
     remaining = max(0.0, min(100.0, 100.0 - used))
-    rem_s = str(int(remaining)) if remaining.is_integer() else f"{remaining:.1f}".rstrip("0").rstrip(".")
-    return f"{rem_s}%/{window_label(win.get('windowMinutes'))}"
+    return f"{int(remaining + 0.5)}%/{window_label(win.get('windowMinutes'))}"
 
 
 def format_line(item: dict[str, Any]) -> str | None:
