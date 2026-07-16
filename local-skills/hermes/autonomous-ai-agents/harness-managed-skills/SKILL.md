@@ -82,9 +82,10 @@ The installer must preserve nested category paths by linking every directory con
 3. If the skill belongs somewhere other than the default `agents` harness, place it in the matching `local-skills/<harness>/` directory.
 4. If instructions or references still point to old canonical paths, patch them in the same session.
 5. Re-run `cd ~/.llm-harness && ./harness.py install`.
-6. Verify installed runtime paths resolve back into `~/.llm-harness`.
-7. Commit in `~/.llm-harness` once verified.
-8. If the user explicitly wants the repo publication/sync step, push as a separate repo action rather than treating it as part of skill authoring itself.
+6. Run `./harness.py audit-skills` to repair safe repo-managed wrong links and record every effective configured skill as `complete` or `blocked` in `state/skill-installation.json`.
+7. Verify installed runtime paths resolve back into `~/.llm-harness`; resolve any `blocked` entries without overwriting an unrelated path.
+8. Commit in `~/.llm-harness` once verified.
+9. If the user explicitly wants the repo publication/sync step, push as a separate repo action rather than treating it as part of skill authoring itself.
    - Use a repo workflow such as `git-commit` for the commit step and a separate push/sync action only when requested.
 
 ## Common Pitfalls
