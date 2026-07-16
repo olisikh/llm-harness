@@ -145,29 +145,37 @@ def cmd_update_repo(args: argparse.Namespace) -> int:
 DESCRIPTION = """\
 Manage the llm-harness repository.
 
-This single entrypoint installs, uninstalls, and updates the repository-driven
-LLM harness homes (e.g. ~/.agents, ~/.claude, ~/.codex, ~/.hermes, ~/.config/opencode).
+This entrypoint installs, uninstalls, and updates repository-driven LLM harness
+homes such as ~/.agents, ~/.claude, ~/.codex, ~/.hermes, and ~/.config/opencode.
+Skills and harness files are mirrored through symlinks driven by config.yaml
+and the routing index in state/skill-routing-index.json.
+"""
 
-Subcommands:
-  install         Symlink configured skills and harness files into target homes.
-  uninstall       Remove all symlinks managed by this repo from target homes.
-  update-skills   Update configured submodule sources and refresh links.
-  audit-skills         Repair safe managed skill links and persist verification state.
-  routing-candidates   List discovered skills withheld pending routing approval.
-  seed-routing-index   Baseline current config-derived routes as approved.
-  approve-skill        Approve a discovered skill for its config-selected harness.
-  update-repo          Pull latest repo, update submodules, audit skills, and install.
-
+EPILOG = """\
 Examples:
-  ./harness.py install
-  ./harness.py routing-candidates --json
-  ./harness.py approve-skill --source path/to/skill --harness agents
-  ./harness.py audit-skills
-  ./harness.py uninstall
-  ./harness.py update-skills
-  ./harness.py update-skills obsidian-skills mattpocock-skills
-  ./harness.py update-skills --commit --push
-  ./harness.py update-repo
+  Install all configured harnesses and skills:
+    ./harness.py install
+
+  Remove every symlink managed by this repo:
+    ./harness.py uninstall
+
+  Update all shared skill submodules and refresh links:
+    ./harness.py update-skills
+
+  Update only selected submodules and commit/push the pointer changes:
+    ./harness.py update-skills --commit --push obsidian-skills mattpocock-skills
+
+  Audit skill installations, repairing safe mismatches:
+    ./harness.py audit-skills
+
+  List skills awaiting routing approval:
+    ./harness.py routing-candidates
+
+  Approve a skill for a target harness:
+    ./harness.py approve-skill --source shared/some-skill --harness agents
+
+  One-shot repo maintenance (pull, update, audit, install):
+    ./harness.py update-repo
 """
 
 
@@ -175,25 +183,34 @@ def main() -> int:
     parser = argparse.ArgumentParser(
         prog="harness.py",
         description=DESCRIPTION,
+        epilog=EPILOG,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    subparsers = parser.add_subparsers(dest="command", required=True)
+    subparsers = parser.add_subparsers(
+        dest="command",
+        required=True,
+        title="commands",
+        metavar="COMMAND",
+    )
 
     install_parser = subparsers.add_parser(
         "install",
         help="symlink configured skills and harness files into target homes",
+        description="Symlink configured skills and harness files into target homes.",
     )
     install_parser.set_defaults(func=cmd_install)
 
     uninstall_parser = subparsers.add_parser(
         "uninstall",
-        help="remove managed symlinks from target homes",
+        help="remove all symlinks managed by this repo from target homes",
+        description="Remove all symlinks managed by this repo from target homes.",
     )
     uninstall_parser.set_defaults(func=cmd_uninstall)
 
     update_parser = subparsers.add_parser(
         "update-skills",
-        help="update configured submodules, then refresh managed skill links",
+        help="update configured submodule sources and refresh managed skill links",
+        description="Update configured submodule sources and refresh managed skill links.",
     )
     update_parser.add_argument(
         "--commit",
@@ -203,11 +220,12 @@ def main() -> int:
     update_parser.add_argument(
         "--push",
         action="store_true",
-        help="push the commit to origin (implies --commit)",
+        help="push the commit to origin (requires --commit)",
     )
     update_parser.add_argument(
         "submodule",
         nargs="*",
+        metavar="SUBMODULE",
         help="specific submodules to update (default: all configured submodules)",
     )
     update_parser.set_defaults(func=cmd_update_skills)
@@ -215,34 +233,54 @@ def main() -> int:
     audit_parser = subparsers.add_parser(
         "audit-skills",
         help="repair safe managed skill links and persist verification state",
+        description="Repair safe managed skill links and persist verification state.",
     )
     audit_parser.set_defaults(func=cmd_audit_skills)
 
     candidates_parser = subparsers.add_parser(
         "routing-candidates",
         help="list discovered skills withheld pending routing approval",
+        description="List discovered skills that are withheld pending routing approval.",
     )
-    candidates_parser.add_argument("--json", action="store_true", help="emit JSON")
+    candidates_parser.add_argument("--json", action="store_true", help="emit JSON output")
     candidates_parser.set_defaults(func=cmd_routing_candidates)
 
     seed_parser = subparsers.add_parser(
         "seed-routing-index",
         help="baseline current config-derived routes as approved",
+        description="Baseline current config-derived routes as approved in the routing index.",
     )
     seed_parser.set_defaults(func=cmd_seed_routing_index)
 
     approve_parser = subparsers.add_parser(
         "approve-skill",
         help="approve a discovered skill for its config-selected harness",
+        description="Approve a discovered skill for its config-selected harness.",
     )
-    approve_parser.add_argument("--source", required=True, help="repo-relative skill directory")
-    approve_parser.add_argument("--harness", required=True, help="configured target harness")
-    approve_parser.add_argument("--reason", default="", help="concise routing rationale")
+    approve_parser.add_argument(
+        "--source",
+        required=True,
+        metavar="PATH",
+        help="repo-relative path to the skill directory",
+    )
+    approve_parser.add_argument(
+        "--harness",
+        required=True,
+        metavar="NAME",
+        help="configured target harness name (e.g. agents, claude, opencode)",
+    )
+    approve_parser.add_argument(
+        "--reason",
+        default="",
+        metavar="TEXT",
+        help="concise routing rationale",
+    )
     approve_parser.set_defaults(func=cmd_approve_skill)
 
     repo_parser = subparsers.add_parser(
         "update-repo",
-        help="pull, update submodules, and install (intended for automation)",
+        help="pull, update submodules, audit, and install (intended for automation)",
+        description="Pull latest repo, update submodules, audit skills, and install.",
     )
     repo_parser.set_defaults(func=cmd_update_repo)
 
