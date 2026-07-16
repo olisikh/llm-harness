@@ -6,6 +6,7 @@ import subprocess
 import sys
 from pathlib import Path
 
+from lib.audit import audit_skill_installations, print_audit_summary
 from lib.config import Config
 from lib.git import update_submodules
 from lib.sync import sync_harness, uninstall_harness
@@ -76,6 +77,22 @@ def cmd_update_skills(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_audit_skills(args: argparse.Namespace) -> int:
+    result = audit_skill_installations(Config(repo_root()))
+    print_audit_summary(result)
+    return 1 if result.invalid_keys else 0
+
+
+def commit_audit_state(root: Path, state_changed: bool) -> None:
+    if not state_changed:
+        return
+    run("git", "add", "state/skill-installation.json", cwd=root)
+    run("git", "commit", "-m", "chore: audit skill installations", cwd=root)
+    branch = run("git", "branch", "--show-current", cwd=root, capture=True).stdout.strip()
+    run("git", "push", "origin", branch, cwd=root)
+    print(f"[audit] Committed and pushed state on {branch}")
+
+
 def cmd_update_repo(args: argparse.Namespace) -> int:
     root = repo_root()
 
@@ -92,13 +109,14 @@ def cmd_update_repo(args: argparse.Namespace) -> int:
     print("== update shared skill submodules and refresh harness links ==")
     update_submodules(root, requested=[], commit=True, push=True)
 
-    cfg = Config(root)
-    for name in cfg.list_harness_names():
-        sync_harness(cfg, name)
+    print("== audit skill installations ==")
+    result = audit_skill_installations(Config(root))
+    print_audit_summary(result)
+    commit_audit_state(root, result.state_changed)
 
     print("== git status ==")
     run("git", "status", "--short", "--branch", cwd=root, check=False)
-    return 0
+    return 1 if result.invalid_keys else 0
 
 
 DESCRIPTION = """\
@@ -110,11 +128,13 @@ LLM harness homes (e.g. ~/.agents, ~/.claude, ~/.codex, ~/.hermes, ~/.config/ope
 Subcommands:
   install         Symlink configured skills and harness files into target homes.
   uninstall       Remove all symlinks managed by this repo from target homes.
-  update-skills   Update configured git submodules, then refresh managed skill links.
-  update-repo     Pull latest repo, then update submodules and refresh links.
+  update-skills   Update configured submodule sources and refresh links.
+  audit-skills    Repair safe managed skill links and persist verification state.
+  update-repo     Pull latest repo, update submodules, audit skills, and install.
 
 Examples:
   ./harness.py install
+  ./harness.py audit-skills
   ./harness.py uninstall
   ./harness.py update-skills
   ./harness.py update-skills obsidian-skills mattpocock-skills
@@ -163,6 +183,12 @@ def main() -> int:
         help="specific submodules to update (default: all configured submodules)",
     )
     update_parser.set_defaults(func=cmd_update_skills)
+
+    audit_parser = subparsers.add_parser(
+        "audit-skills",
+        help="repair safe managed skill links and persist verification state",
+    )
+    audit_parser.set_defaults(func=cmd_audit_skills)
 
     repo_parser = subparsers.add_parser(
         "update-repo",

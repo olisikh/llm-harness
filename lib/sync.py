@@ -22,13 +22,29 @@ def resolve_path(path: Path | str) -> Path:
     return Path(path).resolve()
 
 
-def sync_target(source_abs: Path, target_abs: Path, log_fn: Callable[[str], None]) -> bool:
+def sync_target(
+    source_abs: Path,
+    target_abs: Path,
+    log_fn: Callable[[str], None],
+    managed_root: Path | None = None,
+) -> bool:
     expected = resolve_path(source_abs)
 
     if target_abs.is_symlink():
-        if resolve_path(target_abs) == expected:
+        resolved = resolve_path(target_abs)
+        if resolved == expected:
             log_fn(f"Link already exists at {target_abs}")
             return True
+        if managed_root is not None:
+            try:
+                resolved.relative_to(resolve_path(managed_root))
+            except ValueError:
+                pass
+            else:
+                target_abs.unlink()
+                target_abs.symlink_to(source_abs)
+                log_fn(f"Repaired {target_abs} -> {source_abs}")
+                return True
         warn(f"Skipping existing symlink at {target_abs} (points elsewhere)")
         return False
 
@@ -121,7 +137,7 @@ def sync_harness(config: Config, harness_name: str) -> None:
         desired_targets_by_source[source] = target
 
     for target, source in desired_sources.items():
-        sync_target(source, target, log)
+        sync_target(source, target, log, managed_root=config.repo_root)
 
     desired_source_set = set(desired_targets_by_source.keys())
     for existing in list_managed_symlinks(target_skills_dir, config.repo_root):

@@ -396,9 +396,19 @@ Updates pinned commits for every source with `type: submodule` in `config.yaml`.
 ./harness.py update-skills --commit --push
 ```
 
+### `harness.py audit-skills`
+
+Repairs an incorrect skill symlink only when its current target is already inside `~/.llm-harness`; external symlinks and real paths remain protected and are reported as blocked. It then verifies every **effective** configured target (after source-order collision handling) resolves to the canonical source and writes the portable inventory at `state/skill-installation.json`.
+
+The state uses harness names and repo-relative source paths, never machine-specific absolute paths. New configured skills are reported once when first added to the state; removed skills are reported when their state entry disappears. Only exact installs are marked `complete`; protected conflicts remain `blocked` and make the command exit non-zero.
+
+```bash
+./harness.py audit-skills
+```
+
 ### `harness.py update-repo`
 
-Pulls the latest `llm-harness` repo, then runs `update-skills --commit --push` (which also refreshes managed harness links). Intended for cron or periodic automation.
+Pulls the latest `llm-harness` repo, updates shared submodules, and runs `audit-skills`. When the audit inventory changes, it commits and pushes `state/skill-installation.json` as `chore: audit skill installations`. This is the maintenance command used by the Hermes cron wrapper at `~/.hermes/scripts/update-llm-harness.sh`.
 
 ```bash
 ./harness.py update-repo
