@@ -55,6 +55,16 @@ class SkillAuditTests(unittest.TestCase):
             "status": "complete",
         })
 
+    def test_sync_removes_old_target_when_a_skill_is_rehomed(self):
+        old_target = self.home / "skills" / "old-category" / "example"
+        old_target.parent.mkdir(parents=True)
+        old_target.symlink_to(self.source)
+
+        sync_harness(self.config, "agents")
+
+        self.assertTrue((self.home / "skills" / "category" / "example").is_symlink())
+        self.assertFalse(old_target.exists() or old_target.is_symlink())
+
     def test_audit_repairs_a_wrong_managed_symlink_before_marking_complete(self):
         target = self.home / "skills" / "category" / "example"
         target.parent.mkdir(parents=True)

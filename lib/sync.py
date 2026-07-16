@@ -125,7 +125,6 @@ def sync_harness(config: Config, harness_name: str) -> None:
     target_skills_dir.mkdir(parents=True, exist_ok=True)
 
     desired_sources: dict[Path, Path] = {}
-    desired_targets_by_source: dict[Path, Path] = {}
 
     for harness, rel, source in config.list_configured_skills():
         if harness != harness_name:
@@ -134,15 +133,13 @@ def sync_harness(config: Config, harness_name: str) -> None:
         if target in desired_sources:
             warn(f"Source collision at {target}; later config wins")
         desired_sources[target] = source
-        desired_targets_by_source[source] = target
 
     for target, source in desired_sources.items():
         sync_target(source, target, log, managed_root=config.repo_root)
 
-    desired_source_set = set(desired_targets_by_source.keys())
+    desired_target_set = set(desired_sources)
     for existing in list_managed_symlinks(target_skills_dir, config.repo_root):
-        resolved = resolve_path(existing)
-        if resolved in desired_source_set:
+        if existing in desired_target_set:
             continue
         existing.unlink()
         log(f"Removed stale {existing}")
