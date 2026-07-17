@@ -136,10 +136,6 @@
       "harness": "agents",
       "path": "caveman-commit"
     },
-    "caveman/skills/caveman-compress": {
-      "harness": "agents",
-      "path": "caveman-compress"
-    },
     "caveman/skills/caveman-help": {
       "harness": "agents",
       "path": "caveman-help"
@@ -147,10 +143,6 @@
     "caveman/skills/caveman-review": {
       "harness": "agents",
       "path": "caveman-review"
-    },
-    "caveman/skills/caveman-stats": {
-      "harness": "agents",
-      "path": "caveman-stats"
     },
     "llm-wiki/claude-plugin/skills/wiki-manager": {
       "harness": "claude",
@@ -215,6 +207,16 @@
     "local-skills/agents/nix-shell": {
       "harness": "agents",
       "path": "nix-shell"
+    },
+    "local-skills/agents/personal/obsidian-vault": {
+      "harness": "agents",
+      "path": "personal/obsidian-vault",
+      "reason": "portable replacement reads the shared user-selected vault path"
+    },
+    "local-skills/agents/productivity/handoff": {
+      "harness": "agents",
+      "path": "productivity/handoff",
+      "reason": "portable overlay persists redacted handoffs in the configured ~/.agents artifact directory"
     },
     "local-skills/agents/research/wiki": {
       "harness": "agents",
@@ -321,8 +323,9 @@
       "path": "in-progress/batch-grill-me"
     },
     "mattpocock-skills/skills/in-progress/claude-handoff": {
-      "harness": "agents",
-      "path": "in-progress/claude-handoff"
+      "harness": "claude",
+      "path": "in-progress/claude-handoff",
+      "reason": "uses Claude Code background-agent CLI and is Claude-only"
     },
     "mattpocock-skills/skills/in-progress/loop-me": {
       "harness": "agents",
@@ -372,10 +375,6 @@
       "harness": "agents",
       "path": "personal/edit-article"
     },
-    "mattpocock-skills/skills/personal/obsidian-vault": {
-      "harness": "agents",
-      "path": "personal/obsidian-vault"
-    },
     "mattpocock-skills/skills/productivity/grill-me": {
       "harness": "agents",
       "path": "productivity/grill-me"
@@ -383,10 +382,6 @@
     "mattpocock-skills/skills/productivity/grilling": {
       "harness": "agents",
       "path": "productivity/grilling"
-    },
-    "mattpocock-skills/skills/productivity/handoff": {
-      "harness": "agents",
-      "path": "productivity/handoff"
     },
     "mattpocock-skills/skills/productivity/teach": {
       "harness": "agents",

@@ -9,6 +9,7 @@ from pathlib import Path
 from lib.audit import audit_skill_installations, print_audit_summary
 from lib.config import Config
 from lib.git import update_submodules
+from lib.readiness import audit_skill_readiness, print_readiness_summary
 from lib.routing import (
     approve_skill,
     discover_unapproved_skills,
@@ -87,6 +88,18 @@ def cmd_audit_skills(args: argparse.Namespace) -> int:
     result = audit_skill_installations(Config(repo_root()))
     print_audit_summary(result)
     return 1 if result.invalid_keys else 0
+
+
+def cmd_audit_readiness(args: argparse.Namespace) -> int:
+    root = repo_root()
+    project = Path(args.project).expanduser().resolve() if args.project else None
+    result = audit_skill_readiness(
+        root / "state" / "skill-readiness.yaml",
+        skill_paths_path=Path("~/.agents/config/skill-paths.json").expanduser(),
+        project=project,
+    )
+    print_readiness_summary(result)
+    return 1 if result.blocked else 0
 
 
 def cmd_routing_candidates(args: argparse.Namespace) -> int:
@@ -168,6 +181,12 @@ Examples:
   Audit skill installations, repairing safe mismatches:
     ./harness.py audit-skills
 
+  Audit configured runtime prerequisites without changing them:
+    ./harness.py audit-readiness
+
+  Audit project-specific engineering prerequisites:
+    ./harness.py audit-readiness --project /path/to/project
+
   List skills awaiting routing approval:
     ./harness.py routing-candidates
 
@@ -236,6 +255,18 @@ def main() -> int:
         description="Repair safe managed skill links and persist verification state.",
     )
     audit_parser.set_defaults(func=cmd_audit_skills)
+
+    readiness_parser = subparsers.add_parser(
+        "audit-readiness",
+        help="report declared skill prerequisites without changing runtime state",
+        description="Report declared skill prerequisites without changing runtime state.",
+    )
+    readiness_parser.add_argument(
+        "--project",
+        metavar="PATH",
+        help="also check project-scoped prerequisites in this repository",
+    )
+    readiness_parser.set_defaults(func=cmd_audit_readiness)
 
     candidates_parser = subparsers.add_parser(
         "routing-candidates",

@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "artifacts": {
+    "handoffs": "~/.agents/handoffs",
+    "learning": "~/.agents/learning",
+    "questionnaires": "~/.agents/questionnaires",
+    "reports": "~/.agents/reports",
+    "research": "~/.agents/research",
+    "writing": "~/.agents/writing"
+  },
+  "paths": {
+    "obsidian_vault": "~/notes"
+  }
+}

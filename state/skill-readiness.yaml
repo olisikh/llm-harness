@@ -1,0 +1,85 @@
+version: 1
+skills:
+  agents:apple-notes-to-obsidian:
+    scope: global
+    requirements:
+      - type: path
+        path: ~/notes
+        kind: directory
+      - type: command
+        name: osascript
+  agents:defuddle:
+    scope: global
+    requirements:
+      - type: command
+        name: defuddle
+        optional: true
+  agents:personal/obsidian-vault:
+    scope: global
+    requirements:
+      - type: path
+        path: ~/.agents/config/skill-paths.json
+        kind: file
+      - type: path
+        path: ~/notes
+        kind: directory
+  agents:productivity/handoff:
+    scope: global
+    requirements:
+      - type: artifact_directory
+        name: handoffs
+  agents:resemble-detect:
+    scope: global
+    requirements:
+      - type: environment
+        name: RESEMBLE_API_KEY
+        optional: true
+  agents:research/wiki:
+    scope: global
+    requirements:
+      - type: path
+        path: ~/.config/llm-wiki/config.json
+        kind: file
+  claude:in-progress/claude-handoff:
+    scope: global
+    requirements:
+      - type: command
+        name: claude
+        optional: true
+  openclaw:self-improving-agent:
+    scope: global
+    requirements:
+      - type: path
+        path: ~/.openclaw/workspace/.learnings
+        kind: directory
+  agents:engineering/code-review:
+    scope: project
+    requirements:
+      - type: project_file
+        path: docs/agents/issue-tracker.md
+  agents:engineering/to-spec:
+    scope: project
+    requirements:
+      - type: project_file
+        path: docs/agents/issue-tracker.md
+      - type: project_file
+        path: docs/agents/triage-labels.md
+  agents:engineering/to-tickets:
+    scope: project
+    requirements:
+      - type: project_file
+        path: docs/agents/issue-tracker.md
+      - type: project_file
+        path: docs/agents/triage-labels.md
+  agents:engineering/triage:
+    scope: project
+    requirements:
+      - type: project_file
+        path: docs/agents/issue-tracker.md
+      - type: project_file
+        path: docs/agents/triage-labels.md
+  agents:engineering/wayfinder:
+    scope: project
+    requirements:
+      - type: project_file
+        path: docs/agents/issue-tracker.md

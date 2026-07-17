@@ -11,8 +11,11 @@ sources:
     harness: agents
     exclude:
       - deprecated/
+      - personal/obsidian-vault
+      - productivity/handoff
     overrides:
       misc/git-guardrails-claude-code: claude
+      in-progress/claude-handoff: claude
 
   llm-wiki:
     type: submodule
@@ -40,6 +43,9 @@ sources:
     type: submodule
     root: skills
     harness: agents
+    exclude:
+      - caveman-compress
+      - caveman-stats
 
   self-improving-agent:
     type: submodule

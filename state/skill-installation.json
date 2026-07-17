@@ -42,12 +42,6 @@
       "source": "caveman/skills/caveman-commit",
       "status": "complete"
     },
-    "agents:caveman-compress": {
-      "harness": "agents",
-      "path": "caveman-compress",
-      "source": "caveman/skills/caveman-compress",
-      "status": "complete"
-    },
     "agents:caveman-help": {
       "harness": "agents",
       "path": "caveman-help",
@@ -58,12 +52,6 @@
       "harness": "agents",
       "path": "caveman-review",
       "source": "caveman/skills/caveman-review",
-      "status": "complete"
-    },
-    "agents:caveman-stats": {
-      "harness": "agents",
-      "path": "caveman-stats",
-      "source": "caveman/skills/caveman-stats",
       "status": "complete"
     },
     "agents:changelog-generator": {
@@ -244,12 +232,6 @@
       "harness": "agents",
       "path": "in-progress/batch-grill-me",
       "source": "mattpocock-skills/skills/in-progress/batch-grill-me",
-      "status": "complete"
-    },
-    "agents:in-progress/claude-handoff": {
-      "harness": "agents",
-      "path": "in-progress/claude-handoff",
-      "source": "mattpocock-skills/skills/in-progress/claude-handoff",
       "status": "complete"
     },
     "agents:in-progress/loop-me": {
@@ -441,7 +423,7 @@
     "agents:personal/obsidian-vault": {
       "harness": "agents",
       "path": "personal/obsidian-vault",
-      "source": "mattpocock-skills/skills/personal/obsidian-vault",
+      "source": "local-skills/agents/personal/obsidian-vault",
       "status": "complete"
     },
     "agents:pptx": {
@@ -465,7 +447,7 @@
     "agents:productivity/handoff": {
       "harness": "agents",
       "path": "productivity/handoff",
-      "source": "mattpocock-skills/skills/productivity/handoff",
+      "source": "local-skills/agents/productivity/handoff",
       "status": "complete"
     },
     "agents:productivity/teach": {
@@ -568,6 +550,12 @@
       "harness": "claude",
       "path": "compress",
       "source": "local-skills/claude/compress",
+      "status": "complete"
+    },
+    "claude:in-progress/claude-handoff": {
+      "harness": "claude",
+      "path": "in-progress/claude-handoff",
+      "source": "mattpocock-skills/skills/in-progress/claude-handoff",
       "status": "complete"
     },
     "claude:misc/git-guardrails-claude-code": {

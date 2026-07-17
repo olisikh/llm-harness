@@ -1,6 +1,6 @@
 # Apple Notes Routing Policy
 
-Use this policy when triaging Apple Notes for the `~/notes` Obsidian vault.
+Use this policy when triaging Apple Notes for the configured Obsidian vault (`paths.obsidian_vault` in `~/.agents/config/skill-paths.json`).
 
 ## Vault Targets
 

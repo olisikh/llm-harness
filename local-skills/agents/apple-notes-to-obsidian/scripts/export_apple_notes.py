@@ -16,8 +16,28 @@ import tempfile
 from typing import Iterable
 
 
-DEFAULT_VAULT = Path("~/notes").expanduser()
+SKILL_PATHS_CONFIG = Path("~/.agents/config/skill-paths.json").expanduser()
+FALLBACK_VAULT = Path("~/notes").expanduser()
 REVIEW_ROUTE = Path("40 Reference/Apple Notes Import Review")
+
+
+def default_vault_from_config(
+    *, config_path: Path = SKILL_PATHS_CONFIG, home: Path | None = None
+) -> Path:
+    """Use the shared vault choice, retaining ~/notes for old installations."""
+    home = home or Path.home()
+    try:
+        data = json.loads(config_path.read_text())
+        value = (data.get("paths") or {}).get("obsidian_vault")
+    except (OSError, json.JSONDecodeError):
+        value = None
+    if isinstance(value, str) and value:
+        if value == "~":
+            return home
+        if value.startswith("~/"):
+            return home / value[2:]
+        return Path(value).expanduser()
+    return FALLBACK_VAULT
 
 SENSITIVE_PATTERNS = {
     "credentials": re.compile(
@@ -369,7 +389,12 @@ def write_report(report_path: Path, rows: list[dict[str, str]], write_enabled: b
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--vault", type=Path, default=DEFAULT_VAULT, help="Obsidian vault path. Default: ~/notes")
+    parser.add_argument(
+        "--vault",
+        type=Path,
+        default=default_vault_from_config(),
+        help="Obsidian vault path. Default: paths.obsidian_vault in ~/.agents/config/skill-paths.json (~/notes fallback)",
+    )
     parser.add_argument("--write", action="store_true", help="Write safe classified notes to the vault.")
     parser.add_argument("--report", type=Path, default=Path("/tmp/apple-notes-import-report.md"))
     parser.add_argument("--account", help="Only export accounts whose name contains this text.")

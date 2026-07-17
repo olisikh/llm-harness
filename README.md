@@ -95,6 +95,29 @@ Sync rules:
 - install-time mapping of skills to target harness homes is controlled by `config.yaml`
 - later sources in `config.yaml` win on target-path collision
 
+## User-owned skill data
+
+`config.yaml` controls installation and routing only. Non-secret, user-owned settings
+and durable agent artifacts live under `~/.agents/`:
+
+- `~/.agents/config/skill-paths.json` — configured vault and artifact paths;
+- `~/.agents/handoffs/`, `research/`, `reports/`, `learning/`, `writing/`, and
+  `questionnaires/` — durable portable artifacts.
+
+The tracked source for `skill-paths.json` is `harness/agents/config/`; the
+installer exposes it at `~/.agents/config/skill-paths.json`. Do not store API
+tokens, passwords, or other secrets there.
+
+Audit declared prerequisites without mutating runtime state:
+
+```bash
+./harness.py audit-readiness
+./harness.py audit-readiness --project /path/to/project
+```
+
+`audit-skills` verifies symlink installation; `audit-readiness` reports whether
+declared paths, binaries, credentials, and per-project setup documents are ready.
+
 ## Notes
 
 - canonical checkout path is `~/.llm-harness`

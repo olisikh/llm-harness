@@ -417,6 +417,30 @@ Use `seed-routing-index` only to establish a deliberate baseline for a repositor
 
 The daily Hermes routing cron runs the source update first, reads each withheld candidate, classifies it, updates `config.yaml` for non-default routing, approves it, and then audits the resulting installation. It must keep package-bundled Hermes skills outside this index and never infer a route merely from a name: classify from the skill's actual instructions and dependencies.
 
+### Runtime readiness
+
+Installation state answers whether a skill symlink is correct; it cannot prove that
+an installed skill has its configured vault, credential, binary, or project setup.
+`state/skill-readiness.yaml` is the tracked readiness matrix for the material
+prerequisites discovered during skill review. It supports:
+
+- global checks for user-owned paths, runtime commands, and environment-variable
+  presence;
+- optional checks that report unavailable integrations without failing the audit;
+- project checks for files such as Matt Pocock's `docs/agents/*.md`.
+
+Run the read-only audit after installing or changing user configuration:
+
+```bash
+./harness.py audit-readiness
+./harness.py audit-readiness --project /absolute/path/to/project
+```
+
+The non-secret shared path configuration is installed at
+`~/.agents/config/skill-paths.json` from `harness/agents/config/skill-paths.json`.
+Use `~/.agents` for durable agent artifacts; keep secrets in the relevant runtime
+or provider store.
+
 ### `harness.py audit-skills`
 
 Repairs an incorrect skill symlink only when its current target is already inside `~/.llm-harness`; external symlinks and real paths remain protected and are reported as blocked. It then verifies every **effective** configured target (after source-order collision handling) resolves to the canonical source and writes the portable inventory at `state/skill-installation.json`.
