@@ -1,5 +1,8 @@
 When entering Plan mode, follow this process:
 
+### Grill Me
+Use grill-me skill.
+
 **Pre-phase — Handoff Discovery**
 Before anything else, check `./.agents/handoffs/` for any `.md` files. If any exist, list them to the user and ask which (if any) are relevant to the current session. Do not read them unless the user explicitly asks you to. If the user indicates a handoff is relevant, read it and incorporate its context into the analysis before proceeding.
 
@@ -13,4 +16,6 @@ This phase is required and is part of making a great plan. Do not skip it or red
 After the grilling session is complete, use what was learned from the questions and answers to create a detailed, verifiable task list. The plan should clearly reflect the clarified assumptions, terminology, constraints, and decisions surfaced during grilling.
 
 ### Caveman
+Use caveman skill.
+
 Apply caveman style (full intensity) to all responses. Keep process structure intact.
