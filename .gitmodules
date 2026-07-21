@@ -16,3 +16,6 @@
 [submodule "self-improving-agent"]
 	path = self-improving-agent
 	url = https://github.com/pskoett/self-improving-agent.git
+[submodule "graphify"]
+	path = graphify
+	url = git@github.com:Graphify-Labs/graphify.git

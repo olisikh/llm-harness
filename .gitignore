@@ -8,3 +8,6 @@ hermes-state/skills/.usage.json
 hermes-state/skills/.usage.json.lock
 hermes-state/skills/.curator_state
 hermes-state/skills/.curator_backups
+
+# Keep reproducible development dependencies despite the global shell.nix ignore rule.
+!shell.nix

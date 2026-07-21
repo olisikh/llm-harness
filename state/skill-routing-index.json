@@ -144,6 +144,56 @@
       "harness": "agents",
       "path": "caveman-review"
     },
+    "graphify/graphify/skill-agents.md": {
+      "harness": "agents",
+      "path": "graphify/SKILL.md",
+      "reason": "Graphify Agent Skills variant"
+    },
+    "graphify/graphify/skill-claw.md": {
+      "harness": "hermes",
+      "path": "graphify/SKILL.md",
+      "reason": "Graphify Hermes variant"
+    },
+    "graphify/graphify/skill-codex.md": {
+      "harness": "codex",
+      "path": "graphify/SKILL.md",
+      "reason": "Graphify Codex variant"
+    },
+    "graphify/graphify/skill-opencode.md": {
+      "harness": "opencode",
+      "path": "graphify/SKILL.md",
+      "reason": "Graphify OpenCode variant"
+    },
+    "graphify/graphify/skill.md": {
+      "harness": "claude",
+      "path": "graphify/SKILL.md",
+      "reason": "Graphify Claude skill"
+    },
+    "graphify/graphify/skills/agents/references": {
+      "harness": "agents",
+      "path": "graphify/references",
+      "reason": "Graphify Agent Skills references"
+    },
+    "graphify/graphify/skills/claude/references": {
+      "harness": "claude",
+      "path": "graphify/references",
+      "reason": "Graphify Claude references"
+    },
+    "graphify/graphify/skills/claw/references": {
+      "harness": "hermes",
+      "path": "graphify/references",
+      "reason": "Graphify Hermes references"
+    },
+    "graphify/graphify/skills/codex/references": {
+      "harness": "codex",
+      "path": "graphify/references",
+      "reason": "Graphify Codex references"
+    },
+    "graphify/graphify/skills/opencode/references": {
+      "harness": "opencode",
+      "path": "graphify/references",
+      "reason": "Graphify OpenCode references"
+    },
     "llm-wiki/claude-plugin/skills/wiki-manager": {
       "harness": "claude",
       "path": "wiki-manager"

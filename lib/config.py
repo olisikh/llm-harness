@@ -3,6 +3,7 @@
 
 import json
 import os
+import shlex
 from pathlib import Path
 from typing import Iterator
 
@@ -64,6 +65,9 @@ class Config:
 
         data = self._load_yaml(self.sources_file)
         for entry in (data.get("sources") or {}).values():
+            for artifact in (entry.get("artifacts") or []):
+                if artifact.get("harness"):
+                    names.add(artifact["harness"])
             child_sources = self._normalize_child_sources(entry)
             for source in child_sources:
                 harness = source.get("harness")
@@ -93,6 +97,17 @@ class Config:
             source_base = self.repo_root / source_name
             if not source_base.exists():
                 continue
+
+            for artifact in (entry.get("artifacts") or []):
+                source = source_base / artifact["from"]
+                if not source.exists():
+                    continue
+                yield (
+                    source.relative_to(self.repo_root).as_posix(),
+                    artifact["harness"],
+                    self._skill_relative_path(artifact["to"]),
+                    source,
+                )
 
             child_sources = self._normalize_child_sources(entry)
             excludes = set(entry.get("exclude") or [])
@@ -132,6 +147,12 @@ class Config:
                         yield (source_id, harness, rel, source_abs)
                         dirs.clear()
 
+    @staticmethod
+    def _skill_relative_path(path: str) -> str:
+        """Convert a harness-home skill path to its skills-directory-relative form."""
+        prefix = "skills/"
+        return path.removeprefix(prefix)
+
     def list_configured_skills(self) -> Iterator[tuple[str, str, Path]]:
         """Yield approved (harness_name, target_rel, source_abs) mappings."""
         index = self.routing_index()
@@ -153,3 +174,13 @@ class Config:
         return sorted(
             name for name, entry in sources.items() if entry.get("type") == "submodule"
         )
+
+    def source_install_commands(self) -> Iterator[tuple[Path, list[str]]]:
+        """Yield declared source setup commands, executed in source directories."""
+        data = self._load_yaml(self.sources_file)
+        for source_name, entry in (data.get("sources") or {}).items():
+            source = self.repo_root / source_name
+            if not source.exists():
+                continue
+            for command in entry.get("install") or []:
+                yield source, shlex.split(command)

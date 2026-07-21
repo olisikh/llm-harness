@@ -222,6 +222,18 @@
       "source": "local-skills/agents/git-commit",
       "status": "complete"
     },
+    "agents:graphify/SKILL.md": {
+      "harness": "agents",
+      "path": "graphify/SKILL.md",
+      "source": "graphify/graphify/skill-agents.md",
+      "status": "complete"
+    },
+    "agents:graphify/references": {
+      "harness": "agents",
+      "path": "graphify/references",
+      "source": "graphify/graphify/skills/agents/references",
+      "status": "complete"
+    },
     "agents:image-enhancer": {
       "harness": "agents",
       "path": "image-enhancer",
@@ -552,6 +564,18 @@
       "source": "local-skills/claude/compress",
       "status": "complete"
     },
+    "claude:graphify/SKILL.md": {
+      "harness": "claude",
+      "path": "graphify/SKILL.md",
+      "source": "graphify/graphify/skill.md",
+      "status": "complete"
+    },
+    "claude:graphify/references": {
+      "harness": "claude",
+      "path": "graphify/references",
+      "source": "graphify/graphify/skills/claude/references",
+      "status": "complete"
+    },
     "claude:in-progress/claude-handoff": {
       "harness": "claude",
       "path": "in-progress/claude-handoff",
@@ -570,17 +594,29 @@
       "source": "llm-wiki/claude-plugin/skills/wiki-manager",
       "status": "complete"
     },
+    "codex:graphify/SKILL.md": {
+      "harness": "codex",
+      "path": "graphify/SKILL.md",
+      "source": "graphify/graphify/skill-codex.md",
+      "status": "blocked"
+    },
+    "codex:graphify/references": {
+      "harness": "codex",
+      "path": "graphify/references",
+      "source": "graphify/graphify/skills/codex/references",
+      "status": "blocked"
+    },
     "codex:wiki": {
       "harness": "codex",
       "path": "wiki",
       "source": "llm-wiki/plugins/llm-wiki/skills/wiki",
-      "status": "complete"
+      "status": "blocked"
     },
     "codex:wiki-query": {
       "harness": "codex",
       "path": "wiki-query",
       "source": "llm-wiki/plugins/llm-wiki/skills/wiki-query",
-      "status": "complete"
+      "status": "blocked"
     },
     "hermes:autonomous-ai-agents/harness-managed-skills": {
       "harness": "hermes",
@@ -594,16 +630,34 @@
       "source": "local-skills/hermes/autonomous-ai-agents/llm-harness-ops",
       "status": "complete"
     },
+    "hermes:graphify/SKILL.md": {
+      "harness": "hermes",
+      "path": "graphify/SKILL.md",
+      "source": "graphify/graphify/skill-claw.md",
+      "status": "complete"
+    },
+    "hermes:graphify/references": {
+      "harness": "hermes",
+      "path": "graphify/references",
+      "source": "graphify/graphify/skills/claw/references",
+      "status": "complete"
+    },
     "hermes:model-routing": {
       "harness": "hermes",
       "path": "model-routing",
       "source": "local-skills/hermes/model-routing",
       "status": "complete"
     },
-    "openclaw:self-improving-agent": {
-      "harness": "openclaw",
-      "path": "self-improving-agent",
-      "source": "self-improving-agent/self-improving-agent",
+    "opencode:graphify/SKILL.md": {
+      "harness": "opencode",
+      "path": "graphify/SKILL.md",
+      "source": "graphify/graphify/skill-opencode.md",
+      "status": "complete"
+    },
+    "opencode:graphify/references": {
+      "harness": "opencode",
+      "path": "graphify/references",
+      "source": "graphify/graphify/skills/opencode/references",
       "status": "complete"
     },
     "opencode:wiki-manager": {

@@ -101,6 +101,57 @@ class SkillRoutingTests(unittest.TestCase):
             [("agents", "category/example")],
         )
 
+    def test_artifacts_install_explicit_files_and_directories(self):
+        source_root = self.root / "graphify" / "graphify"
+        (source_root / "skills" / "opencode" / "references").mkdir(parents=True)
+        (source_root / "skill-opencode.md").write_text("---\nname: graphify\n---\n")
+        self.write_config(
+            """  graphify:
+    type: local
+    artifacts:
+      - from: graphify/skill-opencode.md
+        harness: agents
+        to: skills/graphify/SKILL.md
+      - from: graphify/skills/opencode/references
+        harness: agents
+        to: skills/graphify/references
+"""
+        )
+
+        self.assertEqual(
+            [item[:3] for item in self.config.list_discovered_skills()],
+            [
+                (self.source_id, "agents", "category/example"),
+                ("graphify/graphify/skill-opencode.md", "agents", "graphify/SKILL.md"),
+                ("graphify/graphify/skills/opencode/references", "agents", "graphify/references"),
+            ],
+        )
+        seed_routing_index(self.config)
+        self.assertEqual(
+            [(harness, path) for harness, path, _ in self.config.list_configured_skills()],
+            [
+                ("agents", "category/example"),
+                ("agents", "graphify/SKILL.md"),
+                ("agents", "graphify/references"),
+            ],
+        )
+
+    def test_source_install_commands_run_from_source_directory(self):
+        source_root = self.root / "graphify"
+        source_root.mkdir()
+        self.write_config(
+            """  graphify:
+    type: local
+    install:
+      - tool setup --editable .
+"""
+        )
+
+        self.assertEqual(
+            list(self.config.source_install_commands()),
+            [(source_root, ["tool", "setup", "--editable", "."])],
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

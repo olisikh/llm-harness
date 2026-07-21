@@ -52,6 +52,43 @@ sources:
     root: .
     harness: openclaw
 
+  graphify:
+    type: submodule
+    install:
+      - uv tool install --editable .
+      - graphify --help
+    artifacts:
+      - from: graphify/skill.md
+        harness: claude
+        to: skills/graphify/SKILL.md
+      - from: graphify/skills/claude/references
+        harness: claude
+        to: skills/graphify/references
+      - from: graphify/skill-agents.md
+        harness: agents
+        to: skills/graphify/SKILL.md
+      - from: graphify/skills/agents/references
+        harness: agents
+        to: skills/graphify/references
+      - from: graphify/skill-codex.md
+        harness: codex
+        to: skills/graphify/SKILL.md
+      - from: graphify/skills/codex/references
+        harness: codex
+        to: skills/graphify/references
+      - from: graphify/skill-opencode.md
+        harness: opencode
+        to: skills/graphify/SKILL.md
+      - from: graphify/skills/opencode/references
+        harness: opencode
+        to: skills/graphify/references
+      - from: graphify/skill-claw.md
+        harness: hermes
+        to: skills/graphify/SKILL.md
+      - from: graphify/skills/claw/references
+        harness: hermes
+        to: skills/graphify/references
+
   local-skills/agents:
     type: local
     root: .

@@ -41,6 +41,10 @@ def cmd_install(args: argparse.Namespace) -> int:
         )
         return 1
 
+    for source, command in cfg.source_install_commands():
+        print(f"[install] Setup [{source.name}]: {' '.join(command)}")
+        run(*command, cwd=source)
+
     for name in names:
         sync_harness(cfg, name)
 

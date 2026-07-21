@@ -167,6 +167,29 @@ Every source entry under `sources:` shares a common shape. Fields at the top lev
 - `exclude`: list of relative paths under `root` (or under each child source) to skip. End a folder name with `/` to exclude the whole subtree. Use without `/` to exclude a single skill.
 - `overrides`: map from a skill's relative path under `root` to a different harness. Evaluated after the default `harness`.
 
+### Explicit artifacts
+
+Use `artifacts:` when an upstream repository ships files, directories, or paths that
+do not follow the standard directory-with-`SKILL.md` layout. Each artifact is one
+exact source-to-target symlink; both files and directories are supported. This avoids
+running upstream installer scripts while keeping every filename explicit.
+
+```yaml
+  graphify:
+    type: submodule
+    artifacts:
+      - from: graphify/skill-opencode.md
+        harness: opencode
+        to: skills/graphify/SKILL.md
+      - from: graphify/skills/opencode/references
+        harness: opencode
+        to: skills/graphify/references
+```
+
+`from` is relative to the source directory, `to` is relative to the harness home,
+and paths are case-sensitive by convention. Artifacts participate in source-order
+collision handling and routing approval like discovered skills.
+
 Order matters: later sources in `config.yaml` win if two sources produce the same target path.
 
 ### Flattening a nested skill group
@@ -484,4 +507,3 @@ Only sources with `type: submodule` in `config.yaml` are updated. If a submodule
 ### Machine-specific symlink targets appear in git status
 
 This means an intermediate symlink inside the repo is still tracked. Skills must never be symlinked inside `harness/<name>/skills/`; they must be real directories or live in configured sources. If you see a tracked symlink under `harness/`, remove it and rely on `./harness.py install` to create the target-home symlink directly.
-
