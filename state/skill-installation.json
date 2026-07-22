@@ -598,25 +598,25 @@
       "harness": "codex",
       "path": "graphify/SKILL.md",
       "source": "graphify/graphify/skill-codex.md",
-      "status": "blocked"
+      "status": "complete"
     },
     "codex:graphify/references": {
       "harness": "codex",
       "path": "graphify/references",
       "source": "graphify/graphify/skills/codex/references",
-      "status": "blocked"
+      "status": "complete"
     },
     "codex:wiki": {
       "harness": "codex",
       "path": "wiki",
       "source": "llm-wiki/plugins/llm-wiki/skills/wiki",
-      "status": "blocked"
+      "status": "complete"
     },
     "codex:wiki-query": {
       "harness": "codex",
       "path": "wiki-query",
       "source": "llm-wiki/plugins/llm-wiki/skills/wiki-query",
-      "status": "blocked"
+      "status": "complete"
     },
     "hermes:autonomous-ai-agents/harness-managed-skills": {
       "harness": "hermes",
@@ -646,6 +646,12 @@
       "harness": "hermes",
       "path": "model-routing",
       "source": "local-skills/hermes/model-routing",
+      "status": "complete"
+    },
+    "openclaw:self-improving-agent": {
+      "harness": "openclaw",
+      "path": "self-improving-agent",
+      "source": "self-improving-agent/self-improving-agent",
       "status": "complete"
     },
     "opencode:graphify/SKILL.md": {
