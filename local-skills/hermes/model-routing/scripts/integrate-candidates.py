@@ -35,6 +35,35 @@ def git_output(repository: Path, *args: str) -> str | None:
     return result.stdout.strip() if result.returncode == 0 else None
 
 
+def record_integration_evidence(root: Path, *, branch: str, base_commit: str, task_ids: list[str], commits: list[str], events: list[dict[str, Any]], validation: list[dict[str, Any]] | None = None, integration_commit: str | None = None) -> str:
+    payload: dict[str, Any] = {
+        "version": 1,
+        "integration_branch": branch,
+        "base_commit": base_commit,
+        "candidate_task_ids": task_ids,
+        "candidate_commits": commits,
+        "events": events,
+        "validation": validation or [],
+    }
+    if integration_commit is not None:
+        payload["integration_commit"] = integration_commit
+    artifact = root / "integration-evidence.json"
+    artifact.write_text(json.dumps(payload, sort_keys=True, indent=2) + "\n", encoding="utf-8")
+    return str(artifact)
+
+
+def command_event(phase: str, result: subprocess.CompletedProcess[str], *, commit: str | None = None) -> dict[str, Any]:
+    event: dict[str, Any] = {
+        "phase": phase,
+        "returncode": result.returncode,
+        "stdout": result.stdout,
+        "stderr": result.stderr,
+    }
+    if commit is not None:
+        event["commit"] = commit
+    return event
+
+
 def failure(code: str, summary: str, *, state: str = "validation_failure", evidence_locations: list[str] | None = None, validation: list[dict[str, Any]] | None = None, base_commit: str | None = None, candidate_task_ids: list[str] | None = None, candidate_commits: list[str] | None = None, integration_branch: str | None = None) -> dict[str, Any]:
     report: dict[str, Any] = {
         "version": 1,
@@ -168,12 +197,16 @@ def validate_candidates(tasks: list[dict[str, Any]], candidates: list[dict[str, 
     return ordered_ids, commits
 
 
-def run_validation(worktree: Path, commands: list[str]) -> tuple[bool, list[dict[str, Any]]]:
+def run_validation(worktree: Path, commands: list[str]) -> tuple[bool, list[dict[str, Any]], list[dict[str, Any]]]:
     reports: list[dict[str, Any]] = []
+    events: list[dict[str, Any]] = []
     for command in commands:
         result = subprocess.run(command, cwd=worktree, shell=True, capture_output=True, text=True, check=False)
         reports.append({"command": command, "returncode": result.returncode})
-    return all(report["returncode"] == 0 for report in reports), reports
+        event = command_event("combined_validation", result)
+        event["command"] = command
+        events.append(event)
+    return all(report["returncode"] == 0 for report in reports), reports, events
 
 
 def integrate(tasks: list[dict[str, Any]], candidates: list[dict[str, Any]], validation_commands: list[str]) -> dict[str, Any]:
@@ -182,7 +215,7 @@ def integrate(tasks: list[dict[str, Any]], candidates: list[dict[str, Any]], val
     first = tasks[0]
     repository = Path(first["repository"]["path"]).resolve()
     requested_base = first["repository"]["base_commit"]
-    preflight_error, base_commit, active_branch = preflight(repository, requested_base, fetch_upstream=True)
+    preflight_error, base_commit, active_branch = preflight(repository, requested_base, fetch_upstream=False)
     if preflight_error is not None:
         return preflight_error
     assert base_commit is not None and active_branch is not None
@@ -193,26 +226,39 @@ def integrate(tasks: list[dict[str, Any]], candidates: list[dict[str, Any]], val
     evidence_root = Path(tempfile.mkdtemp(prefix="model-routing-integration-"))
     worktree = evidence_root / "worktree"
     branch = f"model-routing/integration-{uuid.uuid4().hex[:12]}"
-    if git(repository, "worktree", "add", "-b", branch, str(worktree), base_commit).returncode != 0:
-        return failure("worktree_failure", "The integration worktree could not be created.", evidence_locations=[str(evidence_root)], base_commit=base_commit, candidate_task_ids=task_ids, candidate_commits=commits)
+    worktree_added = git(repository, "worktree", "add", "-b", branch, str(worktree), base_commit)
+    events = [command_event("worktree_add", worktree_added)]
+    if worktree_added.returncode != 0:
+        evidence = record_integration_evidence(evidence_root, branch=branch, base_commit=base_commit, task_ids=task_ids, commits=commits, events=events)
+        return failure("worktree_failure", "The integration worktree could not be created.", evidence_locations=[str(evidence_root), evidence], base_commit=base_commit, candidate_task_ids=task_ids, candidate_commits=commits, integration_branch=branch)
     for commit in commits:
-        if git(worktree, "cherry-pick", "--no-edit", commit).returncode != 0:
-            return failure("integration_conflict", "A candidate commit conflicts during staged integration.", evidence_locations=[str(evidence_root)], base_commit=base_commit, candidate_task_ids=task_ids, candidate_commits=commits, integration_branch=branch)
-    checks_passed, validation = run_validation(worktree, validation_commands)
+        cherry_pick = git(worktree, "cherry-pick", "--no-edit", commit)
+        events.append(command_event("cherry_pick", cherry_pick, commit=commit))
+        if cherry_pick.returncode != 0:
+            evidence = record_integration_evidence(evidence_root, branch=branch, base_commit=base_commit, task_ids=task_ids, commits=commits, events=events)
+            return failure("integration_conflict", "A candidate commit conflicts during staged integration.", evidence_locations=[str(evidence_root), evidence], base_commit=base_commit, candidate_task_ids=task_ids, candidate_commits=commits, integration_branch=branch)
+    checks_passed, validation, validation_events = run_validation(worktree, validation_commands)
+    events.extend(validation_events)
     if not checks_passed:
-        return failure("integration_validation_failed", "Combined integration validation failed.", evidence_locations=[str(evidence_root)], validation=validation, base_commit=base_commit, candidate_task_ids=task_ids, candidate_commits=commits, integration_branch=branch)
+        evidence = record_integration_evidence(evidence_root, branch=branch, base_commit=base_commit, task_ids=task_ids, commits=commits, events=events, validation=validation)
+        return failure("integration_validation_failed", "Combined integration validation failed.", evidence_locations=[str(evidence_root), evidence], validation=validation, base_commit=base_commit, candidate_task_ids=task_ids, candidate_commits=commits, integration_branch=branch)
     final_error, final_base, final_branch = preflight(repository, base_commit, fetch_upstream=True)
     if final_error is not None:
+        evidence = record_integration_evidence(evidence_root, branch=branch, base_commit=base_commit, task_ids=task_ids, commits=commits, events=events, validation=validation)
         if final_error["state"] == "base_changed":
-            final_error.update({"evidence_locations": [str(evidence_root)], "validation": validation, "base_commit": base_commit, "candidate_task_ids": task_ids, "candidate_commits": commits, "integration_branch": branch})
+            final_error.update({"evidence_locations": [str(evidence_root), evidence], "validation": validation, "base_commit": base_commit, "candidate_task_ids": task_ids, "candidate_commits": commits, "integration_branch": branch})
             return final_error
-        return failure(final_error["code"], final_error["summary"], evidence_locations=[str(evidence_root)], validation=validation, base_commit=base_commit, candidate_task_ids=task_ids, candidate_commits=commits, integration_branch=branch)
+        return failure(final_error["code"], final_error["summary"], evidence_locations=[str(evidence_root), evidence], validation=validation, base_commit=base_commit, candidate_task_ids=task_ids, candidate_commits=commits, integration_branch=branch)
     if final_base != base_commit or final_branch != active_branch:
-        return failure("base_changed", "The active branch changed before local finalization.", state="base_changed", evidence_locations=[str(evidence_root)], validation=validation, base_commit=base_commit, candidate_task_ids=task_ids, candidate_commits=commits, integration_branch=branch)
+        evidence = record_integration_evidence(evidence_root, branch=branch, base_commit=base_commit, task_ids=task_ids, commits=commits, events=events, validation=validation)
+        return failure("base_changed", "The active branch changed before local finalization.", state="base_changed", evidence_locations=[str(evidence_root), evidence], validation=validation, base_commit=base_commit, candidate_task_ids=task_ids, candidate_commits=commits, integration_branch=branch)
     finalized = git(repository, "merge", "--ff-only", branch)
+    events.append(command_event("fast_forward", finalized))
     integrated_commit = git_output(worktree, "rev-parse", "HEAD")
     if finalized.returncode != 0 or integrated_commit is None or git_output(repository, "rev-parse", "HEAD") != integrated_commit:
-        return failure("base_changed", "The active branch changed before the safe local fast-forward.", state="base_changed", evidence_locations=[str(evidence_root)], validation=validation, base_commit=base_commit, candidate_task_ids=task_ids, candidate_commits=commits, integration_branch=branch)
+        evidence = record_integration_evidence(evidence_root, branch=branch, base_commit=base_commit, task_ids=task_ids, commits=commits, events=events, validation=validation, integration_commit=integrated_commit)
+        return failure("base_changed", "The active branch changed before the safe local fast-forward.", state="base_changed", evidence_locations=[str(evidence_root), evidence], validation=validation, base_commit=base_commit, candidate_task_ids=task_ids, candidate_commits=commits, integration_branch=branch)
+    evidence = record_integration_evidence(evidence_root, branch=branch, base_commit=base_commit, task_ids=task_ids, commits=commits, events=events, validation=validation, integration_commit=integrated_commit)
     return {
         "version": 1,
         "task_id": "integration",
@@ -221,7 +267,7 @@ def integrate(tasks: list[dict[str, Any]], candidates: list[dict[str, Any]], val
         "code": "locally_integrated",
         "summary": "Candidate commits passed combined validation and were integrated locally.",
         "evidence": [],
-        "evidence_locations": [str(evidence_root)],
+        "evidence_locations": [str(evidence_root), evidence],
         "base_commit": base_commit,
         "candidate_task_ids": task_ids,
         "candidate_commits": commits,

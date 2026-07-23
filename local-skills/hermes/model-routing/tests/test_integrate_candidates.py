@@ -125,6 +125,10 @@ class StagedIntegrationTests(unittest.TestCase):
             self.assertEqual(self.git(repository, "status", "--porcelain").stdout, "")
             self.assertEqual(self.git(remote, "rev-parse", "HEAD").stdout.strip(), base_commit)
             self.assertEqual(self.git(repository, "rev-list", "--count", "@{u}..HEAD").stdout.strip(), "2")
+            evidence = json.loads(Path(report["evidence_locations"][1]).read_text(encoding="utf-8"))
+            self.assertEqual(evidence["candidate_commits"], report["candidate_commits"])
+            self.assertEqual(evidence["integration_commit"], report["integration_commit"])
+            self.assertEqual([event["command"] for event in evidence["events"] if event["phase"] == "combined_validation"], ["test \"$(cat alpha.txt)\" = alpha", "test \"$(cat bravo.txt)\" = bravo"])
             self.assert_result_valid(directory, report)
 
     def test_local_only_repository_integrates_without_upstream_fetch(self):
@@ -153,7 +157,19 @@ class StagedIntegrationTests(unittest.TestCase):
             self.assertEqual(result.returncode, 2)
             self.assertEqual(report["code"], "integration_conflict")
             self.assertEqual(self.git(repository, "rev-parse", "HEAD").stdout.strip(), base_commit)
-            self.assertTrue(Path(report["evidence_locations"][0]).exists())
+            self.assertEqual(self.git(repository, "status", "--porcelain").stdout, "")
+            evidence_root = Path(report["evidence_locations"][0])
+            self.assertTrue(evidence_root.exists())
+            recovery = evidence_root / "integration-evidence.json"
+            self.assertTrue(recovery.is_file())
+            recorded = json.loads(recovery.read_text(encoding="utf-8"))
+            self.assertEqual(recorded["integration_branch"], report["integration_branch"])
+            self.assertEqual(recorded["candidate_commits"], report["candidate_commits"])
+            self.assertEqual(recorded["events"][-1]["phase"], "cherry_pick")
+            self.assertNotEqual(recorded["events"][-1]["returncode"], 0)
+            recovery_worktree = evidence_root / "worktree"
+            self.assertEqual(self.git(recovery_worktree, "branch", "--show-current").stdout.strip(), report["integration_branch"])
+            self.assertNotEqual(self.git(recovery_worktree, "status", "--porcelain").stdout, "")
             self.assert_result_valid(directory, report)
 
             repository, base_commit = self.make_repo(directory / "validation")
@@ -242,6 +258,8 @@ class StagedIntegrationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as raw:
             directory = Path(raw)
             repository, base_commit = self.make_repo(directory)
+            self.add_upstream(directory, repository)
+            self.git(repository, "remote", "set-url", "origin", "/does-not-exist")
             escaped = self.candidate(directory, repository, base_commit, "alpha", "outside.txt", "escaped")
             result, report = self.run_controller(directory, [manifest("alpha", repository, base_commit, owned_file="alpha.txt")], [escaped], "true")
             self.assertEqual(result.returncode, 2)
