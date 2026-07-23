@@ -990,16 +990,16 @@
       "source": "mattpocock-skills/skills/in-progress/setup-ts-deep-modules",
       "status": "complete"
     },
-    "claude:skill-creator": {
-      "harness": "claude",
-      "path": "skill-creator",
-      "source": "awesome-llm-skills/skill-creator",
-      "status": "complete"
-    },
     "claude:slack-gif-creator": {
       "harness": "claude",
       "path": "slack-gif-creator",
       "source": "awesome-llm-skills/slack-gif-creator",
+      "status": "complete"
+    },
+    "claude:sops-secret-safety": {
+      "harness": "claude",
+      "path": "sops-secret-safety",
+      "source": "local-skills/agents/devops/sops-secret-safety",
       "status": "complete"
     },
     "claude:summarize-changes": {
@@ -1158,6 +1158,12 @@
       "source": "llm-wiki/plugins/llm-wiki/skills/wiki-query",
       "status": "complete"
     },
+    "hermes:autonomous-ai-agents/autonomous-change-execution": {
+      "harness": "hermes",
+      "path": "autonomous-ai-agents/autonomous-change-execution",
+      "source": "local-skills/hermes/autonomous-ai-agents/autonomous-change-execution",
+      "status": "complete"
+    },
     "hermes:autonomous-ai-agents/harness-managed-skills": {
       "harness": "hermes",
       "path": "autonomous-ai-agents/harness-managed-skills",
@@ -1192,7 +1198,7 @@
       "harness": "openclaw",
       "path": "self-improving-agent",
       "source": "self-improving-agent/self-improving-agent",
-      "status": "blocked"
+      "status": "complete"
     },
     "opencode:graphify/SKILL.md": {
       "harness": "opencode",

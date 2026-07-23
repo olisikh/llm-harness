@@ -289,6 +289,11 @@
       "harness": "claude",
       "path": "compress"
     },
+    "local-skills/hermes/autonomous-ai-agents/autonomous-change-execution": {
+      "harness": "hermes",
+      "path": "autonomous-ai-agents/autonomous-change-execution",
+      "reason": "Hermes-only autonomous multi-repository execution workflow."
+    },
     "local-skills/hermes/autonomous-ai-agents/harness-managed-skills": {
       "harness": "hermes",
       "path": "autonomous-ai-agents/harness-managed-skills"
