@@ -125,8 +125,8 @@ def create_git_shim(directory: Path) -> Path:
     shim = directory / "git"
     shim.write_text(
         "#!/bin/sh\n"
-        "case \"$1\" in\n"
-        "  add|commit|reset|restore|merge|rebase|cherry-pick|revert|am|apply|stash|switch|checkout|branch|tag|update-index)\n"
+        "case \" $* \" in\n"
+        "  *\" add \"*|*\" commit \"*|*\" reset \"*|*\" restore \"*|*\" merge \"*|*\" rebase \"*|*\" cherry-pick \"*|*\" revert \"*|*\" am \"*|*\" apply \"*|*\" stash \"*|*\" switch \"*|*\" checkout \"*|*\" branch \"*|*\" tag \"*|*\" update-index \"*)\n"
         "    echo 'model-routing: worker git mutation blocked' >&2; exit 77;;\n"
         "esac\n"
         f"exec {actual_git} \"$@\"\n",
@@ -276,6 +276,11 @@ def execute(manifest: dict[str, Any], policy: dict[str, Any], command: list[str]
         valid_output = isinstance(response.get("output"), dict) and all(field in response["output"] for field in manifest["output_contract"]["required_fields"])
         checks_passed, validation_attempt = run_validation(worktree, manifest["validation_commands"])
         validations.extend(validation_attempt)
+        in_scope, paths = scope_check(worktree, manifest["ownership"])
+        if not in_scope:
+            return failure("scope_violation", "Validation or writer changes escaped exact ownership or a symlink boundary.", state="scope_violation", selected_model=selected, timeout_seconds=timeout_seconds, repair_count=repair_count, evidence_locations=[str(evidence_root)], changed_paths=paths, validation=validations)
+        if worker_touched_git(worktree, base_commit):
+            return failure("worker_git_mutation", "Validation or writer attempted to stage or commit changes.", selected_model=selected, timeout_seconds=timeout_seconds, repair_count=repair_count, evidence_locations=[str(evidence_root)], changed_paths=paths, validation=validations)
         if valid_output and checks_passed:
             break
         if repair_count == 1:

@@ -32,8 +32,8 @@ if step.get(\"write\"):
     target = Path(step[\"write\"][\"path\"])
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(step[\"write\"][\"content\"])
-if step.get(\"git_action\"):
-    action = subprocess.run([\"git\", step[\"git_action\"]], capture_output=True, text=True)
+if step.get(\"git_args\"):
+    action = subprocess.run([\"git\", *step[\"git_args\"]], capture_output=True, text=True)
     Path(plan[\"git_log\"]).write_text(json.dumps({\"returncode\": action.returncode, \"stderr\": action.stderr}))
 print(json.dumps(step.get(\"response\") or {\"kind\": \"success\", \"output\": {\"summary\": \"writer completed\", \"changed_paths\": []}}))
 """
@@ -201,6 +201,20 @@ class WriterCandidateTests(unittest.TestCase):
             self.assertEqual(requests, [])
             self.assertFalse((repo / "ignored-target").exists())
 
+    def test_validation_scope_escape_is_rejected_before_controller_commit(self):
+        with tempfile.TemporaryDirectory() as raw:
+            directory = Path(raw)
+            repo, base = self.make_repo(directory)
+            result, report, _, _ = self.run_candidate(
+                directory,
+                writer_manifest(repo, base, ["test \"$(cat owned.txt)\" = green", "printf escaped > outside.txt"]),
+                [{"write": {"path": "owned.txt", "content": "green"}}],
+            )
+            self.assertEqual(result.returncode, 2)
+            self.assertEqual(report["state"], "scope_violation")
+            self.assertEqual(report["changed_paths"], ["outside.txt", "owned.txt"])
+            self.assertEqual((repo / "outside.txt").read_text(), "initial")
+
     def test_failed_validation_gets_one_same_model_repair_then_full_validation(self):
         with tempfile.TemporaryDirectory() as raw:
             directory = Path(raw)
@@ -241,9 +255,9 @@ class WriterCandidateTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as raw:
             directory = Path(raw)
             repo, base = self.make_repo(directory)
-            for action in ("add", "commit"):
-                with self.subTest(action=action):
-                    result, report, _, git_log = self.run_candidate(directory, writer_manifest(repo, base), [{"write": {"path": "owned.txt", "content": "green"}, "git_action": action}])
+            for args in (["add", "owned.txt"], ["commit", "-m", "worker mutation"], ["-C", ".", "add", "owned.txt"]):
+                with self.subTest(args=args):
+                    result, report, _, git_log = self.run_candidate(directory, writer_manifest(repo, base), [{"write": {"path": "owned.txt", "content": "green"}, "git_args": args}])
                     self.assertEqual(result.returncode, 0, result.stderr)
                     self.assertEqual(report["state"], "candidate_ready")
                     attempt = json.loads(git_log.read_text())
