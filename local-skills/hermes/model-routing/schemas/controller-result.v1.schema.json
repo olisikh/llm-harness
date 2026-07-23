@@ -17,10 +17,15 @@
     "duration_ms": {"type": "integer", "minimum": 0},
     "repair_count": {"type": "integer", "minimum": 0},
     "evidence": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["attempt", "category", "provider", "model"], "properties": {"attempt": {"type": "integer", "minimum": 1}, "category": {"type": "string"}, "provider": {"type": "string"}, "model": {"type": "string"}}}},
-    "evidence_locations": {"type": "array", "items": {"type": "string"}}
+    "evidence_locations": {"type": "array", "items": {"type": "string"}},
+    "base_commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "candidate_commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "candidate_branch": {"type": "string", "minLength": 1},
+    "changed_paths": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "validation": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["command", "returncode"], "properties": {"command": {"type": "string"}, "returncode": {"type": "integer"}}}}
   },
   "allOf": [
-    {"if": {"properties": {"state": {"const": "validation_failure"}}}, "then": {"properties": {"code": {"enum": ["invalid_json", "duplicate_json_key", "input_unavailable", "unsupported_schema_version", "unknown_field", "malformed_task_id", "schema_violation", "duplicate_dependency", "self_dependency", "unrestricted_glob", "path_traversal", "invalid_role_mode", "writer_validation_missing", "invalid_result_code", "non_switchable_failure", "output_validation_failed", "provider_exhausted"]}}}},
+    {"if": {"properties": {"state": {"const": "validation_failure"}}}, "then": {"properties": {"code": {"enum": ["invalid_json", "duplicate_json_key", "input_unavailable", "unsupported_schema_version", "unknown_field", "malformed_task_id", "schema_violation", "duplicate_dependency", "self_dependency", "unrestricted_glob", "path_traversal", "invalid_role_mode", "writer_validation_missing", "invalid_result_code", "non_switchable_failure", "output_validation_failed", "provider_exhausted", "repository_not_git", "repository_dirty", "git_operation_in_progress", "repository_fetch_failed", "repository_diverged", "worker_failed", "worker_timeout", "worker_git_mutation", "validation_failed", "controller_commit_failed", "worktree_failure"]}}}},
     {"if": {"properties": {"state": {"const": "scope_violation"}}}, "then": {"properties": {"code": {"const": "scope_violation"}}}},
     {"if": {"properties": {"state": {"const": "candidate_ready"}}}, "then": {"properties": {"code": {"const": "candidate_ready"}}}},
     {"if": {"properties": {"state": {"const": "base_changed"}}}, "then": {"properties": {"code": {"const": "base_changed"}}}},
