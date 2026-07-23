@@ -1,6 +1,6 @@
 ---
 name: git-commit
-description: Stage and commit the current changes with a well-crafted commit message. Use when the user asks to commit, save changes, or create a commit. Analyzes the diff and writes a concise, meaningful message.
+description: Create a validated Conventional Commit for current repository changes, and push when requested.
 disable-model-invocation: true
 allowed-tools: Bash(git add *) Bash(git commit *) Bash(git diff *) Bash(git status *)
 ---
@@ -19,16 +19,27 @@ allowed-tools: Bash(git add *) Bash(git commit *) Bash(git diff *) Bash(git stat
 
 ## Instructions
 
-1. Review the diff and recent commit style above.
+1. Review the diff, repository guidance, and recent commit history. If a repository defines stricter Conventional Commit types or scopes, follow that project rule.
 2. Stage relevant changed files (prefer specific paths over `git add .`; never stage `.env` or secrets).
-3. Write a commit message that:
-   - Has a concise subject line (≤72 chars) in imperative mood
-   - Focuses on WHY, not what (the diff shows what)
-   - Matches the tone and style of recent commits
-   - Does not add `Co-Authored-By`, model/vendor attribution, or other AI attribution trailers unless the user explicitly requests them
-4. Create the commit using a HEREDOC to preserve formatting.
-5. If the user also asked to **push/sync**, do not assume the earlier status check is still current. Run `git fetch origin`, inspect ahead/behind, and if the push is rejected because `origin/<branch>` moved, rebase onto the updated remote branch before retrying the push. Treat this as a normal race, not as a terminal failure.
-6. Report the commit hash and subject on success.
+3. Compose a Conventional Commit header in this exact shape:
+
+   ```text
+   <type>(<optional-scope>)<optional-!>: <description>
+   ```
+
+   Use one of `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, or `revert`. Use `!` or a `BREAKING CHANGE:` footer for a breaking change. Keep the header at 72 characters or fewer. Do not create a non-Conventional commit.
+4. Put the proposed complete message in a mode-`0600` temporary file and run `scripts/validate-conventional-commit.py` against it. Treat a validation failure as a hard stop; revise the message rather than bypassing validation.
+5. Create the commit with `git commit -F <validated-message-file>`. Do not add `Co-Authored-By`, model/vendor attribution, or other AI attribution trailers unless the user explicitly requests them.
+6. If the user also asked to **push/sync**, do not assume the earlier status check is still current. Run `git fetch origin`, inspect ahead/behind, and if the push is rejected because `origin/<branch>` moved, rebase onto the updated remote branch before retrying the push. Treat this as a normal race, not as a terminal failure.
+7. Report the commit hash and validated Conventional Commit subject on success.
+
+## Functional evaluation
+
+Before claiming a commit succeeded, require:
+
+- `scripts/validate-conventional-commit.py` accepts the exact message file given to Git.
+- A deliberately malformed test header is rejected by that validator.
+- `git log -1 --format=%s` exactly equals the validated header.
 
 ## Pitfalls
 
