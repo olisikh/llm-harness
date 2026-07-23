@@ -84,6 +84,12 @@
       "source": "local-skills/agents/devops/dotfiles-ops",
       "status": "complete"
     },
+    "agents:devops/sops-secret-safety": {
+      "harness": "agents",
+      "path": "devops/sops-secret-safety",
+      "source": "local-skills/agents/devops/sops-secret-safety",
+      "status": "complete"
+    },
     "agents:docx": {
       "harness": "agents",
       "path": "docx",
@@ -490,12 +496,6 @@
       "harness": "agents",
       "path": "resemble-detect",
       "source": "awesome-llm-skills/resemble-detect",
-      "status": "complete"
-    },
-    "agents:skill-creator": {
-      "harness": "agents",
-      "path": "skill-creator",
-      "source": "awesome-llm-skills/skill-creator",
       "status": "complete"
     },
     "agents:slack-gif-creator": {

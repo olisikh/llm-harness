@@ -37,6 +37,7 @@ sources:
     type: submodule
     exclude:
       - document-skills/
+      - skill-creator
     overrides:
       algorithmic-art: claude
     sources:

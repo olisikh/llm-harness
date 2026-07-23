@@ -100,10 +100,6 @@
       "harness": "agents",
       "path": "resemble-detect"
     },
-    "awesome-llm-skills/skill-creator": {
-      "harness": "agents",
-      "path": "skill-creator"
-    },
     "awesome-llm-skills/slack-gif-creator": {
       "harness": "agents",
       "path": "slack-gif-creator"
@@ -221,6 +217,11 @@
     "local-skills/agents/devops/dotfiles-ops": {
       "harness": "agents",
       "path": "devops/dotfiles-ops"
+    },
+    "local-skills/agents/devops/sops-secret-safety": {
+      "harness": "agents",
+      "path": "devops/sops-secret-safety",
+      "reason": "Portable operational guardrail for SOPS secret mutations and recovery."
     },
     "local-skills/agents/explain": {
       "harness": "agents",
