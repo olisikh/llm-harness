@@ -64,8 +64,10 @@ class Config:
             names.add(name)
 
         data = self._load_yaml(self.sources_file)
+        for name in (data.get("skill_mirrors") or {}).keys():
+            names.add(name)
         for entry in (data.get("sources") or {}).values():
-            for artifact in (entry.get("artifacts") or []):
+            for artifact in entry.get("artifacts") or []:
                 if artifact.get("harness"):
                     names.add(artifact["harness"])
             child_sources = self._normalize_child_sources(entry)
@@ -98,7 +100,7 @@ class Config:
             if not source_base.exists():
                 continue
 
-            for artifact in (entry.get("artifacts") or []):
+            for artifact in entry.get("artifacts") or []:
                 source = source_base / artifact["from"]
                 if not source.exists():
                     continue
@@ -131,7 +133,9 @@ class Config:
                             return True
                     return False
 
-                for current_root, dirs, files in os.walk(source_root, followlinks=False):
+                for current_root, dirs, files in os.walk(
+                    source_root, followlinks=False
+                ):
                     dirs.sort()
                     files.sort()
                     if "SKILL.md" in files:
@@ -167,6 +171,26 @@ class Config:
                 ):
                     continue
             yield (harness, rel, source)
+
+    def list_skill_targets(self) -> Iterator[tuple[str, str, Path]]:
+        """Yield direct configured targets and configured derived mirrors."""
+        direct = list(self.list_configured_skills())
+        direct_keys = {(harness, rel) for harness, rel, _ in direct}
+        yield from direct
+
+        mirrors = self._load_yaml(self.sources_file).get("skill_mirrors") or {}
+        for target_harness, mirror in mirrors.items():
+            source_harness = mirror.get("from")
+            if not source_harness:
+                continue
+            for harness, rel, source in direct:
+                if harness != source_harness:
+                    continue
+                if not source.is_dir() or not (source / "SKILL.md").is_file():
+                    continue
+                target_rel = Path(rel).name if mirror.get("flatten", False) else rel
+                if (target_harness, target_rel) not in direct_keys:
+                    yield (target_harness, target_rel, source)
 
     def configured_submodule_names(self) -> list[str]:
         data = self._load_yaml(self.sources_file)

@@ -125,7 +125,7 @@ def sync_harness(config: Config, harness_name: str) -> None:
 
     desired_sources: dict[Path, Path] = {}
 
-    for harness, rel, source in config.list_configured_skills():
+    for harness, rel, source in config.list_skill_targets():
         if harness != harness_name:
             continue
         target = target_skills_dir / rel
@@ -186,7 +186,10 @@ def uninstall_harness(config: Config, harness_name: str) -> None:
             target = target_root / base_name
             if not target.is_symlink():
                 if target.exists():
-                    print(f"[uninstall] WARNING: Skipping non-symlink at {target}", file=sys.stderr)
+                    print(
+                        f"[uninstall] WARNING: Skipping non-symlink at {target}",
+                        file=sys.stderr,
+                    )
                 continue
             if resolve_path(target) != resolve_path(source_entry):
                 print(

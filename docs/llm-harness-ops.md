@@ -97,6 +97,22 @@ A per-skill mapping from its relative path inside `root` to a different harness.
 
 Skill directories may be nested, e.g. `mattpocock-skills/skills/engineering/ask-matt`. The relative path inside `root` is preserved when symlinking into the target harness. The above skill becomes `~/.agents/skills/engineering/ask-matt`. Category folders provide extra semantic context for LLM discovery.
 
+### Claude mirrors
+
+Claude Code discovers skills only as directories directly under its `skills/`
+directory. To expose portable `agents` skills to Claude, configure a flat mirror:
+
+```yaml
+skill_mirrors:
+  claude:
+    from: agents
+    flatten: true
+```
+
+`harness.py install` creates managed symlinks at `~/.claude/skills/<skill-name>`
+only when `~/.claude` already exists. Direct Claude routes win on duplicate names,
+and mirrored skills inherit the source skill's routing-index approval.
+
 ## Configuration files
 
 ### `config.yaml`

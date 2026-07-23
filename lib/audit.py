@@ -29,12 +29,14 @@ def _is_exact_target(source: Path, target: Path) -> bool:
 def _effective_skills(config: Config) -> dict[str, tuple[str, str, Path]]:
     """Return the final configured source for each harness-relative target."""
     desired: dict[str, tuple[str, str, Path]] = {}
-    for harness, relative_path, source in config.list_configured_skills():
+    for harness, relative_path, source in config.list_skill_targets():
         desired[f"{harness}:{relative_path}"] = (harness, relative_path, source)
     return desired
 
 
-def _state_entry(config: Config, harness: str, relative_path: str, source: Path, status: str) -> dict[str, str]:
+def _state_entry(
+    config: Config, harness: str, relative_path: str, source: Path, status: str
+) -> dict[str, str]:
     return {
         "harness": harness,
         "path": relative_path,
@@ -86,7 +88,9 @@ def audit_skill_installations(config: Config) -> SkillAuditResult:
         status = "complete" if _is_exact_target(source, target) else "blocked"
         if status != "complete":
             invalid_keys.append(key)
-        current_skills[key] = _state_entry(config, harness, relative_path, source, status)
+        current_skills[key] = _state_entry(
+            config, harness, relative_path, source, status
+        )
 
     state = {"version": 1, "skills": current_skills}
     state_changed = _write_state(state_path, state)

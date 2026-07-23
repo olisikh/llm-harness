@@ -1,4 +1,10 @@
 ---
+skill_mirrors:
+  # Claude discovers only direct children of ~/.claude/skills.
+  claude:
+    from: agents
+    flatten: true
+
 sources:
   obsidian-skills:
     type: submodule

@@ -10,6 +10,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from lib.config import Config
 from lib.routing import approve_skill, discover_unapproved_skills, seed_routing_index
+from lib.sync import sync_harness
 
 
 class SkillRoutingTests(unittest.TestCase):
@@ -41,7 +42,8 @@ class SkillRoutingTests(unittest.TestCase):
     type: local
     root: .
     harness: agents
-""" + extra
+"""
+            + extra
         )
 
     def test_unapproved_skill_is_withheld_until_its_configured_route_is_approved(self):
@@ -52,22 +54,34 @@ class SkillRoutingTests(unittest.TestCase):
 
         candidates = discover_unapproved_skills(self.config)
 
-        self.assertEqual([candidate.source for candidate in candidates], [self.source_id])
+        self.assertEqual(
+            [candidate.source for candidate in candidates], [self.source_id]
+        )
         self.assertEqual(candidates[0].harness, "agents")
         self.assertEqual(list(self.config.list_configured_skills()), [])
 
-        approve_skill(self.config, self.source_id, "agents", reason="general-use workflow")
+        approve_skill(
+            self.config, self.source_id, "agents", reason="general-use workflow"
+        )
 
         self.assertEqual(
-            [(harness, relative_path) for harness, relative_path, _ in self.config.list_configured_skills()],
+            [
+                (harness, relative_path)
+                for harness, relative_path, _ in self.config.list_configured_skills()
+            ],
             [("agents", "category/example")],
         )
-        index = json.loads((self.root / "state" / "skill-routing-index.json").read_text())
-        self.assertEqual(index["skills"][self.source_id], {
-            "harness": "agents",
-            "path": "category/example",
-            "reason": "general-use workflow",
-        })
+        index = json.loads(
+            (self.root / "state" / "skill-routing-index.json").read_text()
+        )
+        self.assertEqual(
+            index["skills"][self.source_id],
+            {
+                "harness": "agents",
+                "path": "category/example",
+                "reason": "general-use workflow",
+            },
+        )
 
     def test_source_specific_config_route_is_the_route_that_must_be_approved(self):
         self.write_config(
@@ -87,7 +101,10 @@ class SkillRoutingTests(unittest.TestCase):
             approve_skill(self.config, self.source_id, "agents")
         approve_skill(self.config, self.source_id, "claude")
         self.assertEqual(
-            [(harness, relative_path) for harness, relative_path, _ in self.config.list_configured_skills()],
+            [
+                (harness, relative_path)
+                for harness, relative_path, _ in self.config.list_configured_skills()
+            ],
             [("claude", "category/example")],
         )
 
@@ -97,7 +114,10 @@ class SkillRoutingTests(unittest.TestCase):
         self.assertEqual(seeded, 1)
         self.assertEqual(len(discover_unapproved_skills(self.config)), 0)
         self.assertEqual(
-            [(harness, relative_path) for harness, relative_path, _ in self.config.list_configured_skills()],
+            [
+                (harness, relative_path)
+                for harness, relative_path, _ in self.config.list_configured_skills()
+            ],
             [("agents", "category/example")],
         )
 
@@ -123,12 +143,19 @@ class SkillRoutingTests(unittest.TestCase):
             [
                 (self.source_id, "agents", "category/example"),
                 ("graphify/graphify/skill-opencode.md", "agents", "graphify/SKILL.md"),
-                ("graphify/graphify/skills/opencode/references", "agents", "graphify/references"),
+                (
+                    "graphify/graphify/skills/opencode/references",
+                    "agents",
+                    "graphify/references",
+                ),
             ],
         )
         seed_routing_index(self.config)
         self.assertEqual(
-            [(harness, path) for harness, path, _ in self.config.list_configured_skills()],
+            [
+                (harness, path)
+                for harness, path, _ in self.config.list_configured_skills()
+            ],
             [
                 ("agents", "category/example"),
                 ("agents", "graphify/SKILL.md"),
@@ -149,7 +176,34 @@ class SkillRoutingTests(unittest.TestCase):
 
         self.assertEqual(
             list(self.config.source_install_commands()),
-            [(source_root, ["tool", "setup", "--editable", "."])],
+            [(source_root.resolve(), ["tool", "setup", "--editable", "."])],
+        )
+
+    def test_claude_mirror_flattens_approved_agent_skills(self):
+        self.write_config(
+            """skill_mirrors:
+  claude:
+    from: agents
+    flatten: true
+"""
+        )
+        (self.root / "state").mkdir()
+        (self.root / "state" / "skill-routing-index.json").write_text(
+            '{"version": 1, "skills": {}}\n'
+        )
+
+        self.assertEqual(list(self.config.list_skill_targets()), [])
+        approve_skill(self.config, self.source_id, "agents")
+
+        self.assertEqual(
+            [(harness, path) for harness, path, _ in self.config.list_skill_targets()],
+            [("agents", "category/example"), ("claude", "example")],
+        )
+
+        sync_harness(self.config, "claude")
+        self.assertEqual(
+            (self.root / "home" / ".claude" / "skills" / "example").resolve(),
+            self.source.resolve(),
         )
 
 
