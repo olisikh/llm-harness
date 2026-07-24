@@ -283,38 +283,37 @@ def execute(manifest: dict[str, Any], policy: dict[str, Any], command: list[str]
         if worker_touched_git(worktree, base_commit):
             return failure("worker_git_mutation", "Validation or writer attempted to stage or commit changes.", selected_model=selected, timeout_seconds=timeout_seconds, repair_count=repair_count, evidence_locations=[str(evidence_root)], changed_paths=paths, validation=validations)
         if valid_output and checks_passed:
-            break
+            git(worktree, "add", "--all")
+            committed = git(worktree, "commit", "-m", f"feat(controller): complete {manifest['task_id']}")
+            if committed.returncode != 0:
+                return failure("controller_commit_failed", "The controller could not create the validated Conventional Commit.", selected_model=selected, timeout_seconds=timeout_seconds, repair_count=repair_count, evidence_locations=[str(evidence_root)], changed_paths=paths, validation=validations)
+            report = {
+                "version": 1,
+                "task_id": manifest["task_id"],
+                "ok": True,
+                "state": "candidate_ready",
+                "code": "candidate_ready",
+                "summary": "Writer candidate committed in an isolated worktree.",
+                "selected_model": selected,
+                "timeout_seconds": timeout_seconds,
+                "duration_ms": round((time.monotonic() - started) * 1000),
+                "repair_count": repair_count,
+                "evidence": [],
+                "evidence_locations": [str(evidence_root)],
+                "base_commit": base_commit,
+                "candidate_commit": git_output(worktree, "rev-parse", "HEAD"),
+                "candidate_branch": branch,
+                "changed_paths": paths,
+                "validation": validations,
+            }
+            try:
+                telemetry_store.record(telemetry_from_result(report, role=manifest["role"]))
+            except Exception:
+                pass
+            return report
         if repair_count == 1:
             return failure("validation_failed", "The same-model repair did not satisfy the declared output contract and validation commands.", selected_model=selected, timeout_seconds=timeout_seconds, repair_count=repair_count, evidence_locations=[str(evidence_root)], changed_paths=paths, validation=validations)
         repair_count = 1
-    git(worktree, "add", "--all")
-    committed = git(worktree, "commit", "-m", f"feat(controller): complete {manifest['task_id']}")
-    if committed.returncode != 0:
-        return failure("controller_commit_failed", "The controller could not create the validated Conventional Commit.", selected_model=selected, timeout_seconds=timeout_seconds, repair_count=repair_count, evidence_locations=[str(evidence_root)], changed_paths=paths, validation=validations)
-    return {
-        "version": 1,
-        "task_id": manifest["task_id"],
-        "ok": True,
-        "state": "candidate_ready",
-        "code": "candidate_ready",
-        "summary": "Writer candidate committed in an isolated worktree.",
-        "selected_model": selected,
-        "timeout_seconds": timeout_seconds,
-        "duration_ms": round((time.monotonic() - started) * 1000),
-        "repair_count": repair_count,
-        "evidence": [],
-        "evidence_locations": [str(evidence_root)],
-        "base_commit": base_commit,
-        "candidate_commit": git_output(worktree, "rev-parse", "HEAD"),
-        "candidate_branch": branch,
-        "changed_paths": paths,
-        "validation": validations,
-    }
-    try:
-        telemetry_store.record(telemetry_from_result(report, role=manifest["role"]))
-    except Exception:
-        pass
-    return report
 
 
 def telemetry_from_result(report: dict[str, Any], *, role: str | None = None) -> dict[str, Any]:
