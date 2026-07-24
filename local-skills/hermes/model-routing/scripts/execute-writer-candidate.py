@@ -17,6 +17,7 @@ from pathlib import Path
 from typing import Any
 
 import yaml
+import telemetry_store
 
 ROOT = Path(__file__).resolve().parents[1]
 VALIDATOR_PATH = ROOT / "scripts" / "validate-controller-manifest.py"
@@ -308,6 +309,36 @@ def execute(manifest: dict[str, Any], policy: dict[str, Any], command: list[str]
         "candidate_branch": branch,
         "changed_paths": paths,
         "validation": validations,
+    }
+    try:
+        telemetry_store.record(telemetry_from_result(report, role=manifest["role"]))
+    except Exception:
+        pass
+    return report
+
+
+def telemetry_from_result(report: dict[str, Any], *, role: str | None = None) -> dict[str, Any]:
+    selected = report.get("selected_model") or {}
+    outcome = telemetry_store.normalize_outcome(report.get("state"))
+    if outcome not in telemetry_store._ALLOWED_OUTCOMES:
+        outcome = "other"
+    validation_passed = None
+    validation = report.get("validation")
+    if isinstance(validation, list):
+        validation_passed = all(isinstance(item, dict) and item.get("returncode") == 0 for item in validation)
+    scope_violation = report.get("state") == "scope_violation" or report.get("code") == "scope_violation"
+    return {
+        "run_id": report.get("task_id", "unknown"),
+        "task_id": report.get("task_id", "unknown"),
+        "role": role or report.get("role", "unknown"),
+        "provider": selected.get("provider"),
+        "model": selected.get("model"),
+        "reasoning_effort": selected.get("reasoning_effort"),
+        "duration_ms": report.get("duration_ms"),
+        "repair_count": report.get("repair_count"),
+        "outcome": outcome,
+        "validation_passed": validation_passed,
+        "scope_violation": scope_violation,
     }
 
 
