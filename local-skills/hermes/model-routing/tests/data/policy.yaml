@@ -1,0 +1,72 @@
+version: 1
+roles:
+  cheap_worker:
+    models:
+      - provider: openai-codex
+        model: gpt-5.6-luna
+        reasoning_effort: low
+      - provider: ollama-cloud
+        model: deepseek-v4-flash
+    contract:
+      mode: read_only
+    timeout_seconds: 300
+    allowed_tasks:
+      - extraction
+      - classification
+  coder:
+    models:
+      - provider: openai-codex
+        model: gpt-5.6-terra
+        reasoning_effort: high
+      - provider: ollama-cloud
+        model: kimi-k2.7-code
+    contract:
+      mode: writer
+    timeout_seconds: 1200
+  coding_expert:
+    models:
+      - provider: openai-codex
+        model: gpt-5.6-sol
+        reasoning_effort: high
+    contract:
+      mode: read_only
+    timeout_seconds: 600
+  researcher:
+    models:
+      - provider: openai-codex
+        model: gpt-5.6-terra
+        reasoning_effort: high
+      - provider: ollama-cloud
+        model: qwen3.5:397b
+        reasoning_effort: high
+      - provider: ollama-cloud
+        model: deepseek-v4-pro
+        reasoning_effort: high
+    contract:
+      mode: read_only
+    timeout_seconds: 900
+  final_reviewer:
+    models:
+      - provider: openai-codex
+        model: gpt-5.6-sol
+        reasoning_effort: high
+    contract:
+      mode: read_only
+    timeout_seconds: 600
+switching:
+  transport_failures:
+    - rate_limit
+    - timeout
+    - provider_error
+  configured_api_retries: 3
+  same_model_structured_output_repairs: 1
+  escalation_after_distinct_model_failures: 2
+limits:
+  max_parallel_workers: 2
+  max_expensive_workers: 1
+isolation:
+  writer_execution: git_worktree
+review:
+  role: final_reviewer
+  required_for_routed_tasks: true
+  max_rejections: 2
