@@ -1,7 +1,7 @@
 ---
 name: model-routing
 description: Hermes-only deterministic routing policy. Use for non-trivial, parallelizable, coding, research, ambiguous, high-risk, or repeatedly failing work. Read ~/.hermes/model-routing.yaml and run the controller from ~/.llm-harness/local-skills/hermes/model-routing/scripts before selecting a route, model, fallback, or escalation path.
-version: 2.1.0
+version: 2.1.1
 author: Hermes Agent
 license: MIT
 metadata:
@@ -111,7 +111,7 @@ Models advance only for provider or transport failure. One same-model repair is 
 - Require findings, evidence, files changed, unresolved questions, and validation status.
 - Verify child claims and all external side effects in the parent.
 
-Native children must carry a valid read-only contract. The profile guard (`~/.hermes/plugins/model-routing-guard/guard.py`) blocks terminal, arbitrary code execution, file mutation, interactive browser tools, messaging, memory, cron, task management, and external side-effect MCP namespaces. In Task 10 it remains in audit-only mode; Task 11 may enable blocking mode after E2E acceptance passes.
+Native children must carry a valid read-only contract. The profile guard (`~/.hermes/plugins/model-routing-guard/guard.py`) blocks terminal, arbitrary code execution, file mutation, interactive browser tools, messaging, memory, cron, task management, and external side-effect MCP namespaces. Task 11 enabled blocking mode after the full E2E suite passed; audit mode remains available via `--audit`.
 
 For a per-task specialist model that does not match the configured native spec, run an explicit OpenCode or one-shot Hermes process. Keep the handoff compact and evidence-based.
 

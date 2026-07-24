@@ -89,7 +89,7 @@ This command is read-only. It never writes `config.yaml`. If it reports an error
 - Writer candidates are created in isolated Git worktrees; overlapping scopes are rejected before launch.
 - Deterministic JSON/schema/test work uses tools, not an LLM claim.
 - Final review (`final_reviewer`) runs once per routed request that includes a writer.
-- Native delegation guard blocks terminal/mutation attempts in audit mode (Task 11 may enable blocking).
+- Native delegation guard blocks terminal/mutation attempts. Blocking enforcement is enabled now that Task 11 E2E acceptance passed; audit mode remains available via `--audit`.
 - Repositories are clean and synchronized after documentation updates.
 
 ## Future local model enablement
