@@ -262,7 +262,7 @@ def integrate(tasks: list[dict[str, Any]], candidates: list[dict[str, Any]], val
         evidence = record_integration_evidence(evidence_root, branch=branch, base_commit=base_commit, task_ids=task_ids, commits=commits, events=events, validation=validation, integration_commit=integrated_commit)
         return failure("base_changed", "The active branch changed before the safe local fast-forward.", state="base_changed", evidence_locations=[str(evidence_root), evidence], validation=validation, base_commit=base_commit, candidate_task_ids=task_ids, candidate_commits=commits, integration_branch=branch)
     evidence = record_integration_evidence(evidence_root, branch=branch, base_commit=base_commit, task_ids=task_ids, commits=commits, events=events, validation=validation, integration_commit=integrated_commit)
-    return {
+    report = {
         "version": 1,
         "task_id": "integration",
         "ok": True,
