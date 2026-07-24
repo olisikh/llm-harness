@@ -1,6 +1,6 @@
 # Hermes Routing Procedure Reference
 
-The declarative policy lives in `~/.hermes/model-routing.yaml`. This file describes only the execution contract used with that policy; it does not duplicate role models or provider fallback order.
+The declarative policy lives in `~/.hermes/model-routing.yaml`. This file describes the execution contract used with that policy and the deterministic controller in `~/.llm-harness/local-skills/hermes/model-routing/`. It does not duplicate role models or provider fallback order.
 
 ## Compact handoff contract
 
@@ -49,47 +49,49 @@ next_action: "<specific request for receiving model>"
 
 Represent empty list fields as `[]` and unknown scalar fields as `null`. Do not omit machine-readable keys. Store large raw outputs in files and reference their paths.
 
-## Editing the routing policy
+## Validating the routing policy
 
-1. Edit `~/.hermes/model-routing.yaml`.
-2. Run the deterministic checker:
+```bash
+~/.hermes/hermes-agent/venv/bin/python \
+  ~/.hermes/scripts/validate-model-routing.py
+```
+
+Expected output:
+
+```text
+routing_policy=valid
+version=1
+```
+
+This command is read-only. It never writes `config.yaml`. If it reports an error, edit `~/.hermes/model-routing.yaml` and rerun.
+
+## Running a routed task
+
+1. Build a version-1 task manifest.
+2. Validate it:
 
    ```bash
    ~/.hermes/hermes-agent/venv/bin/python \
-     ~/.hermes/scripts/sync-model-routing-config.py --check
+     ~/.llm-harness/local-skills/hermes/model-routing/scripts/validate-controller-manifest.py \
+     --kind task --input manifest.json
    ```
 
-3. If it reports drift, preview the exact owned projection:
+3. Execute through the appropriate controller script (for example `execute-read-only-route.py` or `execute-writer-candidate.py`), or build a batch and use `schedule-routed-tasks.py`.
 
-   ```bash
-   ~/.hermes/hermes-agent/venv/bin/python \
-     ~/.hermes/scripts/sync-model-routing-config.py --print
-   ```
-
-4. After reviewing it, project only routing-owned fields:
-
-   ```bash
-   ~/.hermes/hermes-agent/venv/bin/python \
-     ~/.hermes/scripts/sync-model-routing-config.py --apply
-   ```
-
-5. Re-run `--check` and `hermes config check`.
-6. Test through isolated one-shot commands, not an active gateway restart.
-7. Commit the policy, projection, and validation evidence together in the Hermes-state repository.
+4. Inspect the emitted JSON result artifact. Failure states include a stable `code` and `summary`.
 
 ## Behavioral verification checklist
 
-- The checker reports `model-routing policy and config.yaml are synchronized`.
-- `hermes fallback list` matches `runtime_projection.fallback_providers`.
-- The installed `model-routing` skill resolves to the canonical `local-skills/hermes` source and is visible in `~/.hermes/skills`, not `~/.agents/skills`.
+- `validate-model-routing.py` reports `routing_policy=valid`.
+- The installed `model-routing` skill resolves to the canonical `~/.llm-harness/local-skills/hermes/model-routing` source and is visible in `~/.hermes/skills/model-routing`.
 - A direct synthetic request does not delegate.
-- A two-part bounded request produces two native children and parent validation.
-- An explicit specialist command uses the role selected from the YAML policy.
+- A two-part bounded request produces two cheap read-only children with parent validation.
+- Writer candidates are created in isolated Git worktrees; overlapping scopes are rejected before launch.
 - Deterministic JSON/schema/test work uses tools, not an LLM claim.
-- Reviewer use matches `roles.final_reviewer.invoke_only_for`.
-- No local model is selected when `privacy_and_verification.local_ollama.status` is `disabled`.
+- Final review (`final_reviewer`) runs once per routed request that includes a writer.
+- Native delegation guard blocks terminal/mutation attempts in audit mode (Task 11 may enable blocking).
 - Repositories are clean and synchronized after documentation updates.
 
 ## Future local model enablement
 
-Do not change `local_ollama.status` from `disabled` until all declared prerequisites are complete: explicit approval, installation, and a benchmark appropriate to the actual hardware. Add the selected model and the benchmark result to the policy in the same commit.
+Do not add a local Ollama route until all declared prerequisites are complete: explicit approval, installation, and a benchmark appropriate to the actual hardware. Add the selected model and the benchmark result to the policy in the same commit.
