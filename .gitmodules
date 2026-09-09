@@ -16,6 +16,6 @@
 [submodule "graphify"]
 	path = submodules/graphify
 	url = git@github.com:Graphify-Labs/graphify.git
-[submodule "submodules/exa-skills"]
+[submodule "exa-skills"]
 	path = submodules/exa-skills
-	url = https://github.com/exa-labs/agent-skills
+	url = https://github.com/exa-labs/agent-skills.git
