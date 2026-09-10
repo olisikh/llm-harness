@@ -1456,7 +1456,7 @@
       "harness": "openclaw",
       "path": "skills/self-improving-agent",
       "source": "submodules/self-improving-agent/self-improving-agent",
-      "status": "complete"
+      "status": "blocked"
     },
     "opencode:prompts": {
       "harness": "opencode",
