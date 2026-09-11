@@ -312,6 +312,12 @@
       "source": "submodules/obsidian-skills/skills/json-canvas",
       "status": "complete"
     },
+    "agents:skills/knap": {
+      "harness": "agents",
+      "path": "skills/knap",
+      "source": "submodules/obsidian-skills/skills/knap",
+      "status": "complete"
+    },
     "agents:skills/lead-generation": {
       "harness": "agents",
       "path": "skills/lead-generation",
@@ -1020,6 +1026,12 @@
       "source": "submodules/obsidian-skills/skills/json-canvas",
       "status": "complete"
     },
+    "claude:skills/knap": {
+      "harness": "claude",
+      "path": "skills/knap",
+      "source": "submodules/obsidian-skills/skills/knap",
+      "status": "complete"
+    },
     "claude:skills/lead-generation": {
       "harness": "claude",
       "path": "skills/lead-generation",
@@ -1456,7 +1468,7 @@
       "harness": "openclaw",
       "path": "skills/self-improving-agent",
       "source": "submodules/self-improving-agent/self-improving-agent",
-      "status": "blocked"
+      "status": "complete"
     },
     "opencode:prompts": {
       "harness": "opencode",
@@ -1780,6 +1792,12 @@
       "harness": "pi",
       "path": "skills/json-canvas",
       "source": "submodules/obsidian-skills/skills/json-canvas",
+      "status": "complete"
+    },
+    "pi:skills/knap": {
+      "harness": "pi",
+      "path": "skills/knap",
+      "source": "submodules/obsidian-skills/skills/knap",
       "status": "complete"
     },
     "pi:skills/lead-generation": {
