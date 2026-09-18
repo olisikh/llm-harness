@@ -468,6 +468,12 @@
       "source": "submodules/awesome-llm-skills/document-skills/pptx",
       "status": "complete"
     },
+    "agents:skills/pr": {
+      "harness": "agents",
+      "path": "skills/pr",
+      "source": "submodules/mattpocock-skills/skills/in-progress/pr",
+      "status": "complete"
+    },
     "agents:skills/prototype": {
       "harness": "agents",
       "path": "skills/prototype",
@@ -1180,6 +1186,12 @@
       "harness": "claude",
       "path": "skills/pptx",
       "source": "submodules/awesome-llm-skills/document-skills/pptx",
+      "status": "complete"
+    },
+    "claude:skills/pr": {
+      "harness": "claude",
+      "path": "skills/pr",
+      "source": "submodules/mattpocock-skills/skills/in-progress/pr",
       "status": "complete"
     },
     "claude:skills/prototype": {
@@ -1948,6 +1960,12 @@
       "harness": "pi",
       "path": "skills/pptx",
       "source": "submodules/awesome-llm-skills/document-skills/pptx",
+      "status": "complete"
+    },
+    "pi:skills/pr": {
+      "harness": "pi",
+      "path": "skills/pr",
+      "source": "submodules/mattpocock-skills/skills/in-progress/pr",
       "status": "complete"
     },
     "pi:skills/prototype": {
