@@ -279,7 +279,7 @@
     "agents:skills/implement-spec": {
       "harness": "agents",
       "path": "skills/implement-spec",
-      "source": "submodules/mattpocock-skills/skills/in-progress/implement-spec",
+      "source": "submodules/mattpocock-skills/skills/engineering/implement-spec",
       "status": "complete"
     },
     "agents:skills/improve-codebase-architecture": {
@@ -471,7 +471,7 @@
     "agents:skills/pr": {
       "harness": "agents",
       "path": "skills/pr",
-      "source": "submodules/mattpocock-skills/skills/in-progress/pr",
+      "source": "submodules/mattpocock-skills/skills/engineering/pr",
       "status": "complete"
     },
     "agents:skills/prototype": {
@@ -498,16 +498,10 @@
       "source": "submodules/awesome-llm-skills/resemble-detect",
       "status": "complete"
     },
-    "agents:skills/resolving-merge-conflicts": {
-      "harness": "agents",
-      "path": "skills/resolving-merge-conflicts",
-      "source": "submodules/mattpocock-skills/skills/engineering/resolving-merge-conflicts",
-      "status": "complete"
-    },
     "agents:skills/retro": {
       "harness": "agents",
       "path": "skills/retro",
-      "source": "submodules/mattpocock-skills/skills/in-progress/retro",
+      "source": "submodules/mattpocock-skills/skills/engineering/retro",
       "status": "complete"
     },
     "agents:skills/safe-refactor": {
@@ -999,7 +993,7 @@
     "claude:skills/implement-spec": {
       "harness": "claude",
       "path": "skills/implement-spec",
-      "source": "submodules/mattpocock-skills/skills/in-progress/implement-spec",
+      "source": "submodules/mattpocock-skills/skills/engineering/implement-spec",
       "status": "complete"
     },
     "claude:skills/improve-codebase-architecture": {
@@ -1191,7 +1185,7 @@
     "claude:skills/pr": {
       "harness": "claude",
       "path": "skills/pr",
-      "source": "submodules/mattpocock-skills/skills/in-progress/pr",
+      "source": "submodules/mattpocock-skills/skills/engineering/pr",
       "status": "complete"
     },
     "claude:skills/prototype": {
@@ -1218,16 +1212,10 @@
       "source": "submodules/awesome-llm-skills/resemble-detect",
       "status": "complete"
     },
-    "claude:skills/resolving-merge-conflicts": {
-      "harness": "claude",
-      "path": "skills/resolving-merge-conflicts",
-      "source": "submodules/mattpocock-skills/skills/engineering/resolving-merge-conflicts",
-      "status": "complete"
-    },
     "claude:skills/retro": {
       "harness": "claude",
       "path": "skills/retro",
-      "source": "submodules/mattpocock-skills/skills/in-progress/retro",
+      "source": "submodules/mattpocock-skills/skills/engineering/retro",
       "status": "complete"
     },
     "claude:skills/safe-refactor": {
@@ -1773,7 +1761,7 @@
     "pi:skills/implement-spec": {
       "harness": "pi",
       "path": "skills/implement-spec",
-      "source": "submodules/mattpocock-skills/skills/in-progress/implement-spec",
+      "source": "submodules/mattpocock-skills/skills/engineering/implement-spec",
       "status": "complete"
     },
     "pi:skills/improve-codebase-architecture": {
@@ -1965,7 +1953,7 @@
     "pi:skills/pr": {
       "harness": "pi",
       "path": "skills/pr",
-      "source": "submodules/mattpocock-skills/skills/in-progress/pr",
+      "source": "submodules/mattpocock-skills/skills/engineering/pr",
       "status": "complete"
     },
     "pi:skills/prototype": {
@@ -1992,16 +1980,10 @@
       "source": "submodules/awesome-llm-skills/resemble-detect",
       "status": "complete"
     },
-    "pi:skills/resolving-merge-conflicts": {
-      "harness": "pi",
-      "path": "skills/resolving-merge-conflicts",
-      "source": "submodules/mattpocock-skills/skills/engineering/resolving-merge-conflicts",
-      "status": "complete"
-    },
     "pi:skills/retro": {
       "harness": "pi",
       "path": "skills/retro",
-      "source": "submodules/mattpocock-skills/skills/in-progress/retro",
+      "source": "submodules/mattpocock-skills/skills/engineering/retro",
       "status": "complete"
     },
     "pi:skills/safe-refactor": {
