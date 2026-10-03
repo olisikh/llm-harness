@@ -366,6 +366,12 @@
       "source": "submodules/awesome-llm-skills/meeting-insights-analyzer",
       "status": "complete"
     },
+    "agents:skills/megacave": {
+      "harness": "agents",
+      "path": "skills/megacave",
+      "source": "submodules/caveman/skills/megacave",
+      "status": "complete"
+    },
     "agents:skills/migrate-to-shoehorn": {
       "harness": "agents",
       "path": "skills/migrate-to-shoehorn",
@@ -616,6 +622,12 @@
       "harness": "agents",
       "path": "skills/triage",
       "source": "submodules/mattpocock-skills/skills/engineering/triage",
+      "status": "complete"
+    },
+    "agents:skills/ultracave": {
+      "harness": "agents",
+      "path": "skills/ultracave",
+      "source": "submodules/caveman/skills/ultracave",
       "status": "complete"
     },
     "agents:skills/verify-and-stop": {
@@ -1080,6 +1092,12 @@
       "source": "submodules/awesome-llm-skills/meeting-insights-analyzer",
       "status": "complete"
     },
+    "claude:skills/megacave": {
+      "harness": "claude",
+      "path": "skills/megacave",
+      "source": "submodules/caveman/skills/megacave",
+      "status": "complete"
+    },
     "claude:skills/migrate-to-shoehorn": {
       "harness": "claude",
       "path": "skills/migrate-to-shoehorn",
@@ -1330,6 +1348,12 @@
       "harness": "claude",
       "path": "skills/triage",
       "source": "submodules/mattpocock-skills/skills/engineering/triage",
+      "status": "complete"
+    },
+    "claude:skills/ultracave": {
+      "harness": "claude",
+      "path": "skills/ultracave",
+      "source": "submodules/caveman/skills/ultracave",
       "status": "complete"
     },
     "claude:skills/verify-and-stop": {
@@ -1848,6 +1872,12 @@
       "source": "submodules/awesome-llm-skills/meeting-insights-analyzer",
       "status": "complete"
     },
+    "pi:skills/megacave": {
+      "harness": "pi",
+      "path": "skills/megacave",
+      "source": "submodules/caveman/skills/megacave",
+      "status": "complete"
+    },
     "pi:skills/migrate-to-shoehorn": {
       "harness": "pi",
       "path": "skills/migrate-to-shoehorn",
@@ -2098,6 +2128,12 @@
       "harness": "pi",
       "path": "skills/triage",
       "source": "submodules/mattpocock-skills/skills/engineering/triage",
+      "status": "complete"
+    },
+    "pi:skills/ultracave": {
+      "harness": "pi",
+      "path": "skills/ultracave",
+      "source": "submodules/caveman/skills/ultracave",
       "status": "complete"
     },
     "pi:skills/verify-and-stop": {
